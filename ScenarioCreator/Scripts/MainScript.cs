@@ -12,7 +12,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient
 {
-    public class MainMenu : BaseScript
+    public class MainScript : BaseScript
     {
         #region Variables
 
@@ -21,9 +21,9 @@ namespace ScenarioCreatorClient
         /// <summary>
         /// Constructor.
         /// </summary>
-        public MainMenu()
+        public MainScript()
         {
-            
+
         }
         /// <summary>
         /// Main OnTick task runs every game tick and handles all the menu stuff.

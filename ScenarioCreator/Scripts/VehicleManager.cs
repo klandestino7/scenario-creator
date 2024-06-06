@@ -5,10 +5,11 @@ using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.UI.Screen;
 
-namespace ScenarioCreatorClient
+namespace ScenarioCreatorClient.Scripts
 {
-    
-    public static class Vehicle {
+
+    public static class Vehicle
+    {
 
     }
 }
