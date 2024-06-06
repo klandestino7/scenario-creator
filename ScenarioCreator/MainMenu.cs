@@ -9,8 +9,6 @@ using MenuAPI;
 using Newtonsoft.Json;
 
 using static CitizenFX.Core.Native.API;
-using static ScenarioCreatorShared.ConfigManager;
-using static ScenarioCreatorShared.PermissionsManager;
 
 namespace ScenarioCreatorClient
 {

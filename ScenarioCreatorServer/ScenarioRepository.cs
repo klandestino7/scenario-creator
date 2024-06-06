@@ -8,7 +8,6 @@ using CitizenFX.Core;
 using Newtonsoft.Json;
 
 using static CitizenFX.Core.Native.API;
-using static ScenarioCreatorServer.DebugLog;
 
 namespace ScenarioCreatorServer
 {
