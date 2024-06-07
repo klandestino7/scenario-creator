@@ -9,7 +9,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient.Classes
 {
-    abstract class EntityBase
+    public abstract class EntityBase
     {
         public abstract int Id  { get; set; }
         public abstract string Model  { get; set; }
@@ -42,7 +42,6 @@ namespace ScenarioCreatorClient.Classes
 
             return localEntity;
         }
-
 
         public void BeforeDestroy()
         {

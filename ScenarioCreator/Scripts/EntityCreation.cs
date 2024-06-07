@@ -57,12 +57,16 @@ namespace ScenarioCreatorClient.Scripts
         /// <param name="model">model of entity as hash</param>
         /// <param name="coords">initial coords for the entity</param>
         /// <returns>true spawn was succesful</returns>
-        public static async void SpawnEntity(uint model, Vector3 coords, bool enableModificationPos = false)
+        public static async void SpawnEntity(uint model, Vector3 coords)
         {
             if (!IsModelValid(model))
             {
                 Notify.Error(CommonErrors.InvalidInput);
                 return;
+            }
+
+            if (CurrentEntity != null && !DoesEntityExist( CurrentEntity.Handle ) ) {
+                CurrentEntity = null;
             }
 
             if (CurrentEntity != null)
@@ -98,7 +102,7 @@ namespace ScenarioCreatorClient.Scripts
 
             SetEntityAsMissionEntity(handle, true, true); // Set As mission to prevent despawning
 
-            Active = enableModificationPos;
+            Active = true;
         }
 
         public static async void UpdateEntityPosition()
@@ -119,7 +123,7 @@ namespace ScenarioCreatorClient.Scripts
         /// </summary>
         public static async void FinishPlacement(bool duplicate = false)
         {
-            var cachedEntity = CurrentEntity;
+            int cachedEntity = CurrentEntity.Handle;
             if (duplicate)
             {
                 var hash = CurrentEntity.Model.Hash;
@@ -135,7 +139,7 @@ namespace ScenarioCreatorClient.Scripts
             }
 
             TriggerEvent("scenarioCreator:entitySpawnedOnScene", cachedEntity);
-            cachedEntity = null;
+            cachedEntity = 0;
         }
 
         #region InternalMethods

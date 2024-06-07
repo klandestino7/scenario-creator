@@ -14,7 +14,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient.Classes
 {
-    class EntityVehicle : EntityBase
+    public class EntityVehicle : EntityBase
     {
         public override int Id  { get; set; }
         public override string Model  { get; set; }

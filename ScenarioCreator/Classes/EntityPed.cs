@@ -14,7 +14,7 @@ using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient.Classes
 {
-    class EntityPed : EntityBase
+    public class EntityPed : EntityBase
     {
         public override int Id  { get; set; }
         public override string Model  { get; set; }
@@ -94,7 +94,7 @@ namespace ScenarioCreatorClient.Classes
         public void PlayPedActions() 
         {
             var lEntity = GetEntity();
-            
+
         }
 
         public override void DrawOnWorld()

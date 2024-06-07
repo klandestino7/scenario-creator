@@ -47,6 +47,7 @@ namespace ScenarioCreatorClient
         {
             // EventHandlers["onClientResourceStart"] += new Action<string>(OnClientResourceStart);
             EventHandlers["onClientResourceStop"] += new Action<string>(OnClientResourceStop);
+            EventHandlers["scenarioCreator:entitySpawnedOnScene"] += new Action<int>(OnEntitySpawnedOnScene);
         }
 
         private void OnClientResourceStop(string resourceName)
@@ -54,6 +55,53 @@ namespace ScenarioCreatorClient
             if ( _currentScene != null ) {
                 _currentScene.BeforeDestroy();
             }
+        }
+
+        private void OnEntitySpawnedOnScene( int ent )
+        {
+            Entity newEntity = Entity.FromHandle( ent );
+
+            var entityType = GetEntityType( newEntity.Handle );
+
+            Debug.WriteLine(" OnEntitySpawnedOnScene :: ");
+
+            switch ( (eEntityTypeToClass)entityType ) 
+            {
+                case eEntityTypeToClass.EntityPed:
+                    var p = new EntityPed(
+                        -1,
+                        "player_zero",
+                        newEntity.Position,
+                        newEntity.Rotation,
+                        1
+                    );
+                    _currentScene.AddPedToScene( p, newEntity.Handle);
+                break;
+
+                case eEntityTypeToClass.EntityProp:
+                    var pp = new EntityProp(
+                        -1,
+                        "player_zero",
+                        newEntity.Position,
+                        newEntity.Rotation
+                    );
+                    _currentScene.AddPropToScene( pp, newEntity.Handle);
+                break;
+
+                case eEntityTypeToClass.EntityVehicle:
+                    var vehicleplate = GetVehicleNumberPlateText( newEntity.Handle );
+                    var vv = new EntityVehicle(
+                        -1,
+                        "cypher",
+                        newEntity.Position,
+                        newEntity.Rotation,
+                        null,
+                        vehicleplate
+                    );
+
+                    _currentScene.AddVehicleToScene( vv, newEntity.Handle );
+                break;
+            } 
         }
 
         public void OpenMainSceneMenu()
