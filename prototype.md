@@ -11,7 +11,7 @@ scenario_peds {
     model;
     outfitVariation?;
     position;
-    heading;
+    rotation;
 
     isFreezed?;
     scenarioAnim?;
@@ -31,7 +31,7 @@ scenario_vehicles {
     props;
     plate;
     position;
-    heading;
+    rotation;
 
     pedDriver?;
     driverMetadata?;
@@ -49,8 +49,6 @@ scenario_props {
     attachedMetadata?;
 }
 
-
-
 > Menu para selecionar uma entidade
 > Através dessa entidade escolher o modo de
 > Deletar, Editar e Atualizar.
@@ -63,11 +61,13 @@ scenario_props {
 >>> Delete Scene
 
 >> Scene Selected
+>>> EDIT MODE bool
 >>> Add new Entity
 >>> Entity List
 >>> Start Scene
 >>> Stop Scene
 >>> Restart Scene
+>>> Save Scene
 
 >> Entity Selected
 >>> Edit Entity

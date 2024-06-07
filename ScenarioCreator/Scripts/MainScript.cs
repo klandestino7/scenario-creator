@@ -8,14 +8,18 @@ using MenuAPI;
 
 using Newtonsoft.Json;
 
+using ScenarioCreatorClient.Scripts;
+
 using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient
 {
     public class MainScript : BaseScript
     {
-        #region Variables
+        public int CurrentSceneSelectedId;
 
+        #region Variables
+        public static bool DebugMode = true; // GetResourceMetadata(GetCurrentResourceName(), "client_debug_mode", 0) == "true";
         #endregion
 
         /// <summary>
@@ -23,15 +27,21 @@ namespace ScenarioCreatorClient
         /// </summary>
         public MainScript()
         {
-
+            RegisterEventMethods();
+            RegisterCommands();
         }
-        /// <summary>
-        /// Main OnTick task runs every game tick and handles all the menu stuff.
-        /// </summary>
-        /// <returns></returns>
-        private async Task OnTick()
-        {
 
+        private void RegisterEventMethods() 
+        {
+            // EventHandlers["onClientResourceStart"] += new Action<string>(OnClientResourceStart);
+        }
+
+        private void RegisterCommands()
+        {
+            RegisterCommand("openMenu", new Action<int, List<object>>((source, args) =>
+            {
+                new MainMenu(this).OpenMenu();
+            }), false);
         }
     }
 }

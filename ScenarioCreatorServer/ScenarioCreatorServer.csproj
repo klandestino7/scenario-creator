@@ -15,7 +15,6 @@
   <ItemGroup>
     <Compile Include="..\SharedClasses\ConfigManager.cs" Link="ConfigManager.cs" />
     <Compile Include="..\SharedClasses\Globals.cs" Link="Globals.cs" />
-    <Compile Include="..\SharedClasses\PermissionsManager.cs" Link="PermissionsManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

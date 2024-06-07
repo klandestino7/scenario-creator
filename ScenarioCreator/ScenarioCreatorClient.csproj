@@ -10,9 +10,13 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="data\**" />
+    <EmbeddedResource Remove="data\**" />
+    <None Remove="data\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SharedClasses\ConfigManager.cs" Link="ConfigManager.cs" />
     <Compile Include="..\SharedClasses\Globals.cs" Link="Globals.cs" />
-    <Compile Include="..\SharedClasses\PermissionsManager.cs" Link="PermissionsManager.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,10 +33,6 @@
       <Private>true</Private>
     </Reference>
 
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Resource Include="data\overlays.json" />
   </ItemGroup>
   
   <ItemGroup>

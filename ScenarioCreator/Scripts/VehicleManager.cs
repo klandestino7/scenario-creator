@@ -8,8 +8,4 @@ using static CitizenFX.Core.UI.Screen;
 namespace ScenarioCreatorClient.Scripts
 {
 
-    public static class Vehicle
-    {
-
-    }
 }
