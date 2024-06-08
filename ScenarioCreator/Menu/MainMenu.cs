@@ -18,106 +18,98 @@ namespace ScenarioCreatorClient
 {
     internal class MainMenu : Menu
     {
-        //private readonly MainScript _script;
+        private readonly MainScript _script;
         #region Variables
-        List<string> skins = new List<string>() {
-            "player_zero",
-            "a_f_m_fatcult_01",
-            "a_m_m_trampbeac_01"
-        };
 
         #endregion
 
-        internal MainMenu(MainScript script, string name = Globals.ScriptName, string subtitle = "Main Menu") : base(name, subtitle)
+
+        internal MainMenu(MainScript script, string name = Globals.ScriptName, string subtitle = "Select a scene") : base(name, subtitle)
         {
+            _script = script;
+
             this.InstructionalButtons.Remove(Control.FrontendCancel);
-            this.InstructionalButtons.Add(Control.FrontendX, "Variation");
-            this.InstructionalButtons.Add(Control.FrontendY, "Accessory");
+
+            this.InstructionalButtons.Add(Control.SaveReplayClip, "Delete");
+            this.InstructionalButtons.Add(Control.ReplayStartStopRecordingSecondary, "Create New");
 
             Update();
         }
 
         internal void Update()
         {
-            
-            int i = 1;
-            foreach (var s in skins)
+            if ( _script._scenarios.Count > 0 )
             {
-                var item = new MenuItem(s ?? $"Character #{i}");
-                    Debug.WriteLine($" nEW MODEL ::: {s}");
-                
-                item.ItemData = s;
-                this.AddMenuItem(item);
-                i++;
+                int i = 1;
+                foreach (var s in _script._scenarios)
+                {
+                    var item = new MenuItem(s.name);
+                    
+                    item.ItemData = s.id;
+                    this.AddMenuItem(item);
+                    i++;
+                }
             }
-
-            bool inSelection = true;
+            else
+            {
+                var item = new MenuItem("Theres no scene created");
+                item.Enabled = false;
+                this.AddMenuItem(item);
+            }
 
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
             {
-                // if (inSelection)
-                //     m.Visible = true;
+
             };
 
-            // sets the requested model every time the player changes the selection
-            int selectedPed = 0;
+            int currentMenuItemSceneId = 0;
+
+            this.ButtonPressHandlers.Add(
+                new Menu.ButtonPressHandler(
+                    Control.ReplayStartStopRecording,
+                    Menu.ControlPressCheckType.JUST_PRESSED,
+                    new Action<Menu, Control>((m, c) =>
+                    {
+                        _script.RequestCreateNewScene(  );
+                        // create new
+                    }), true
+                )
+            );
+
+            this.ButtonPressHandlers.Add(
+                new Menu.ButtonPressHandler(
+                    Control.SaveReplayClip,
+                    Menu.ControlPressCheckType.JUST_PRESSED,
+                    new Action<Menu, Control>((m, c) =>
+                    {
+                        if ( currentMenuItemSceneId > 0 )
+                            _script.RequestDeleteScene( currentMenuItemSceneId );
+                        // delete
+                    }), true
+                )
+            );
+
             this.OnIndexChange += async (Menu m, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex) =>
             {
-                if (newItem.ItemData is string skin)
-                {
-                    selectedPed = GetHashKey(skin);
-    
-                    var res = await Utils.LoadEntityModel( (uint)selectedPed );
-
-                    if (!res ) {
-                        Notify.Error(" Player MOdel Invalid ");
-                        return;
-                    }
-
-                    Debug.WriteLine($" THIS A NEW MODEL ::: {selectedPed} - {skin}");
-                    SetPlayerModel(PlayerId(), (uint)selectedPed);
-                }
+                currentMenuItemSceneId = newItem.ItemData;
             };
 
-            // when the secondary button is pressed, set a random component variation
-            this.ButtonPressHandlers.Add(
-                new Menu.ButtonPressHandler(
-                    Control.FrontendX,
-                    Menu.ControlPressCheckType.JUST_PRESSED,
-                    new Action<Menu, Control>((m, c) =>
-                    {
-                        SetPedRandomComponentVariation(PlayerPedId(), false);
-                    }), true
-                )
-            );
-
-            // when the tertiary button is pressed, set a random prop
-            this.ButtonPressHandlers.Add(
-                new Menu.ButtonPressHandler(
-                    Control.FrontendY,
-                    Menu.ControlPressCheckType.JUST_PRESSED,
-                    new Action<Menu, Control>((m, c) =>
-                    {
-                        SetPedRandomProps(PlayerPedId());
-                    }), true
-                )
-            );
-
-            // when the player chooses a model
             this.OnItemSelect += (Menu m, MenuItem menuItem, int itemIndex) =>
             {
-                // sets selectModel to false, to allow exiting the method
-                inSelection = false;
+                currentMenuItemSceneId = menuItem.ItemData;
 
                 m.Visible = false;
                 m.CloseMenu();
                 MenuController.CloseAllMenus();
+
+                _script.SelectScene( currentMenuItemSceneId );
             };
 
             MenuController.AddMenu(this);
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
-            this.Visible = true;
+            MenuController.MenuToggleKey = Control.ReplayStartStopRecording;
+            this.Visible = false;
         }
 
         internal bool HideMenu
