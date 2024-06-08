@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 using ScenarioCreatorShared;
 using ScenarioCreatorClient.Scripts;
 using CitizenFX.Core.Native;
+using ScenarioCreatorClient.Classes;
 
 namespace ScenarioCreatorClient
 {
@@ -23,11 +24,7 @@ namespace ScenarioCreatorClient
         private readonly SceneScript _script;
         #region Variables;
 
-        List<string> skins = new List<string>() {
-            "player_zero",
-            "a_f_m_fatcult_01",
-            "a_m_m_trampbeac_01"
-        };
+        List<EntityBase> _entities;
 
         #endregion
 
@@ -38,40 +35,68 @@ namespace ScenarioCreatorClient
             // this.InstructionalButtons.Add(Control.FrontendX, "Variation");
             // this.InstructionalButtons.Add(Control.FrontendY, "Accessory");
 
+            _entities = _script.GetEntitiesScene();
+
             Update();
         }
 
         internal void Update()
         {
-            
-           int i = 1;
-            foreach (var s in skins)
+            bool nextMenu = false;
+            int i = 1;
+            foreach (var s in _entities)
             {
-                var item = new MenuItem(s ?? $"Character #{i}");
+                Debug.WriteLine($" ESSE ENT :: {s.Model}");
+                var item = new MenuItem(s.Model ?? $"Character #{i}");
                 
-                item.ItemData = s;
+                item.ItemData = s.localEntityId;
                 this.AddMenuItem(item);
                 i++;
             }
 
+            int lastEntity = 0;
+
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
             {
-                _script.OpenMainSceneMenu();
+                if ( !nextMenu ) 
+                {
+                    _script.OpenMainSceneMenu();
+                }
+
+                if ( lastEntity != 0 && DoesEntityExist( lastEntity )) 
+                {
+                    SetEntityDrawOutline( lastEntity , false );
+                }
             };
 
             this.OnIndexChange += async (Menu m, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex) =>
             {
+                int newEntity = newItem.ItemData;
                 
+                if ( lastEntity != 0 && DoesEntityExist( lastEntity )) 
+                {
+                    SetEntityDrawOutline( lastEntity , false );
+                }
+            
+                if (newEntity != null && DoesEntityExist( newEntity ) )
+                {
+                    SetEntityDrawOutline( newEntity , true );
+                    SetEntityDrawOutlineColor( 20, 255, 20, 255 );
+                    SetEntityDrawOutlineShader( 0 );
+                }
+
+                lastEntity = newEntity;
             };
 
             // when the player chooses a model
             this.OnItemSelect += (Menu m, MenuItem menuItem, int itemIndex) =>
             {
                 m.Visible = false;
+                nextMenu = true;
                 m.CloseMenu();
 
-                _script.OpenEntityMenu();
+                _script.OpenEntityMenu( menuItem.ItemData );
             };
 
             MenuController.AddMenu(this);

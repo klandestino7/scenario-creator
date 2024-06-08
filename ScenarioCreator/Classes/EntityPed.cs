@@ -20,7 +20,7 @@ namespace ScenarioCreatorClient.Classes
         public override string Model  { get; set; }
         public override Vector3 Position  { get; set; }
         public override Vector3 Rotation  { get; set; }
-        public override Entity localEntity { get; set; }
+        public override int localEntityId { get; set; }
         public override int netEntityId { get; set; }
 
         public int OutfitVariation  { get; }
@@ -75,11 +75,11 @@ namespace ScenarioCreatorClient.Classes
             int modelHash = GetHashKey( Model ); 
             await Utils.LoadEntityModel( (uint)modelHash );
 
-            var localEntityId = CreatePed(4, (uint)modelHash, Position.X, Position.Y, Position.Z, Rotation.Z, true, true);
+            var locEntId = CreatePed(4, (uint)modelHash, Position.X, Position.Y, Position.Z, Rotation.Z, true, true);
 
-            SetEntityRotation( localEntityId, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
+            SetEntityRotation( locEntId, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
 
-            localEntity = Entity.FromHandle( localEntityId );
+            localEntityId = localEntityId;
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
 
             while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {

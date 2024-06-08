@@ -15,7 +15,8 @@ namespace ScenarioCreatorClient.Classes
         public abstract string Model  { get; set; }
         public abstract Vector3 Position  { get; set; }
         public abstract Vector3 Rotation  { get; set; }
-        public abstract CitizenFX.Core.Entity localEntity { get; set; }
+        public abstract int localEntityId { get; set; }
+        private Entity localEntity { get; set; }
         public abstract int netEntityId { get; set; }
         public abstract void BeforeInitialization();
         // public abstract void BeforeDestroy();

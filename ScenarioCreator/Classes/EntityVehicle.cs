@@ -20,7 +20,7 @@ namespace ScenarioCreatorClient.Classes
         public override string Model  { get; set; }
         public override Vector3 Position  { get; set; }
         public override Vector3 Rotation  { get; set; }
-        public override Entity localEntity { get; set; }
+        public override int localEntityId { get; set; }
         public override int netEntityId { get; set; }
         public Dictionary<string, int> Props  { get; }
         public string Plate  { get; }
@@ -70,13 +70,13 @@ namespace ScenarioCreatorClient.Classes
 
             Debug.WriteLine($" BeforeInitialization :: LoadEntityModel ");
 
-            var localEntityId = await CommonFunctions.SpawnVehicle( (uint)modelHash, false, false, skipLoad: false, vehicleInfo: new CommonFunctions.VehicleInfo(), saveName: null, Position.X, Position.Y, Position.Z, Rotation.Z);
+            var locEntId = await CommonFunctions.SpawnVehicle( (uint)modelHash, false, false, skipLoad: false, vehicleInfo: new CommonFunctions.VehicleInfo(), saveName: null, Position.X, Position.Y, Position.Z, Rotation.Z);
 
-            Debug.WriteLine($" BeforeInitialization :: SpawnVehicle {localEntityId}");
-            localEntity = Entity.FromHandle(localEntityId);
-            netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
+            Debug.WriteLine($" BeforeInitialization :: SpawnVehicle {locEntId}");
+            localEntityId = locEntId;
+            netEntityId = NetworkGetNetworkIdFromEntity( locEntId );
             
-            while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
+            while (NetworkGetNetworkIdFromEntity( locEntId ) == 0) {
                 await Task.Delay(100);
             }
         }

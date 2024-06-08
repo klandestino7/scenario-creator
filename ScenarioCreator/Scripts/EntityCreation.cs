@@ -266,6 +266,8 @@ namespace ScenarioCreatorClient.Scripts
                     }
                 }
 
+                Game.DisableControlThisFrame(0, Control.Attack);
+
                 // Controls
                 if (Game.IsControlPressed(0, Control.VehicleFlyRollLeftOnly))
                 {
@@ -275,11 +277,11 @@ namespace ScenarioCreatorClient.Scripts
                 {
                     headingOffset -= rotateSpeed * Game.LastFrameTime;
                 } 
-                else if (Game.IsControlJustPressed(0, Control.Attack) && !Game.IsControlPressed(0, Control.Sprint))
+                else if (Game.IsDisabledControlJustPressed(0, Control.Attack) && !Game.IsControlPressed(0, Control.Sprint))
                 {
                     FinishPlacement();
                 }
-                else if (Game.IsControlPressed(0, Control.Sprint) && Game.IsControlJustReleased(0, Control.Attack))
+                else if (Game.IsControlPressed(0, Control.Sprint) && Game.IsDisabledControlJustReleased(0, Control.Attack))
                 {
                     FinishPlacement( true );
                 }

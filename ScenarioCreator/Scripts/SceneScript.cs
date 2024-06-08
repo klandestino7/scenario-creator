@@ -11,6 +11,8 @@ using Newtonsoft.Json;
 using ScenarioCreatorClient.Classes;
 using ScenarioCreatorClient.Scripts;
 
+using ScenarioCreatorShared;
+
 using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient
@@ -22,7 +24,7 @@ namespace ScenarioCreatorClient
         private SceneMenu _sceneMenu;
         private Scene _currentScene;
 
-        private Dictionary<string, dynamic> _currentSceneData; 
+        private Scenario _currentSceneData; 
 
         public bool editModeEnabled = false;
         public bool isSpawnEntityMode = false;
@@ -56,12 +58,20 @@ namespace ScenarioCreatorClient
 
         private void OnClientResourceStop(string resourceName)
         {
-            Debug.WriteLine($" OnClientResourceStop :: {resourceName}"); 
-
-            if ( _currentScene != null )
+            if ( resourceName == GetCurrentResourceName() )
             {
-                _currentScene.BeforeDestroy();
+                Debug.WriteLine($" OnClientResourceStop :: {resourceName}"); 
+
+                if ( _currentScene != null )
+                {
+                    _currentScene.BeforeDestroy();
+                }
             }
+        }
+
+        public List<EntityBase> GetEntitiesScene()
+        {
+            return _currentScene.GetEntities();
         }
 
         private void OnUpdateEnitityPosition( int ent )
@@ -122,28 +132,26 @@ namespace ScenarioCreatorClient
 
         public void InitializeSceneFromId( int sceneId )
         {
-            GetSceneDataFromServer( sceneId );
-
             if ( _currentScene != null ) 
             {
                 _currentScene.BeforeDestroy();
                 _currentScene = null;
             }
-
-            _currentScene = new Scene(
-                _currentSceneData["id"],
-                _currentSceneData["name"],
-                _currentSceneData["vehicles"],
-                _currentSceneData["peds"],
-                _currentSceneData["props"]
-            );
         }
 
          private void GetSceneDataFromServer(int sceneId)
         {
-            Func<string, string> CallbackFunction = (data) =>
+            Func<Scenario, List<ScenarioPed>, List<ScenarioProp>, List<ScenarioVehicle>, string> CallbackFunction = (scenario, peds, props, vehicles) =>
             {
-                _currentSceneData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(data);
+                _currentSceneData = scenario;
+
+                _currentScene = new Scene(
+                    scenario.Id,
+                    scenario.Name,
+                    vehicles,
+                    peds,
+                    props
+                );
                 return "";
             };
             BaseScript.TriggerServerEvent("scenarioCreator:getSceneDataFromDb", 1, sceneId, CallbackFunction);
@@ -172,7 +180,7 @@ namespace ScenarioCreatorClient
         }
         public async Task<bool> HandleAddNewEntity( ) 
         {
-            var result = await CommonFunctions.GetUserInput(windowTitle: "Enter Vehicle Name");
+            var result = await CommonFunctions.GetUserInput(windowTitle: "Enter Entity Name");
             // If the result was not invalid.
             if (!string.IsNullOrEmpty(result))
             {
@@ -229,12 +237,14 @@ namespace ScenarioCreatorClient
 
         #endregion
 
-        public void OpenEntityMenu()
+        public void OpenEntityMenu( int entityId )
         {
             if (_entityMenu == null)
             {
                 _entityMenu = new EntityMenu(this);
             }
+
+            selectedEntity = entityId;
             
             _entityMenu.OpenMenu();
         }
@@ -298,7 +308,7 @@ namespace ScenarioCreatorClient
                         return;
                     }
 
-                    if ( entitySelected.localEntity == null || !DoesEntityExist( entitySelected.localEntity.Handle ))
+                    if ( entitySelected.localEntityId == null || !DoesEntityExist( entitySelected.localEntityId ))
                     {
                         Notify.Error(CommonErrors.InvalidEntity);
                         lastEntity = 0;
@@ -306,12 +316,14 @@ namespace ScenarioCreatorClient
                     }
 
 
-                    selectedEntity = entitySelected.localEntity.Handle;
+                    selectedEntity = entitySelected.localEntityId;
                     SetEntityDrawOutlineColor( 20, 255, 20, 255 );
 
                     Debug.WriteLine(" ENTREI UMA VEZ :: ");
 
-                    EntityCreation.SetCurrentEntity( entitySelected.localEntity );
+                    Entity locEnt = Entity.FromHandle( entitySelected.localEntityId ); 
+
+                    EntityCreation.SetCurrentEntity( locEnt );
                     EntityCreation.SetHandleMoveStatus( true );
                 }
             }

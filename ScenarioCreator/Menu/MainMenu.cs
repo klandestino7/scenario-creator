@@ -67,7 +67,7 @@ namespace ScenarioCreatorClient
 
             this.ButtonPressHandlers.Add(
                 new Menu.ButtonPressHandler(
-                    Control.ReplayStartStopRecording,
+                    Control.ReplayStartStopRecordingSecondary,
                     Menu.ControlPressCheckType.JUST_PRESSED,
                     new Action<Menu, Control>((m, c) =>
                     {

@@ -15,6 +15,10 @@
     <None Remove="data\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SharedClasses\Scenario.cs" Link="Scenario.cs" />
+    <Compile Include="..\SharedClasses\ScenarioPed.cs" Link="ScenarioPed.cs" />
+    <Compile Include="..\SharedClasses\ScenarioProp.cs" Link="ScenarioProp.cs" />
+    <Compile Include="..\SharedClasses\ScenarioVehicle.cs" Link="ScenarioVehicle.cs" />
     <Compile Include="..\SharedClasses\ConfigManager.cs" Link="ConfigManager.cs" />
     <Compile Include="..\SharedClasses\Globals.cs" Link="Globals.cs" />
   </ItemGroup>

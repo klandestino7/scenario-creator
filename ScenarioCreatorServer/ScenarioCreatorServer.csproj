@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net452</TargetFramework>
     <DebugType>embedded</DebugType>
@@ -13,6 +13,10 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\SharedClasses\Scenario.cs" Link="Scenario.cs" />
+    <Compile Include="..\SharedClasses\ScenarioPed.cs" Link="ScenarioPed.cs" />
+    <Compile Include="..\SharedClasses\ScenarioProp.cs" Link="ScenarioProp.cs" />
+    <Compile Include="..\SharedClasses\ScenarioVehicle.cs" Link="ScenarioVehicle.cs" />
     <Compile Include="..\SharedClasses\ConfigManager.cs" Link="ConfigManager.cs" />
     <Compile Include="..\SharedClasses\Globals.cs" Link="Globals.cs" />
   </ItemGroup>
@@ -23,6 +27,8 @@
     <PackageReference Include="CitizenFX.Core.Server" Version="1.0.6335">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
+    
+    <PackageReference Include="MySql.Data" Version="6.10.9" />
     
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\shared\Newtonsoft.Json.dll</HintPath>

@@ -43,10 +43,11 @@ namespace ScenarioCreatorClient
 
         private async void RegisterEventMethods() 
         {
-            GetAllScenes();
         
-            await Delay(1500);
+            await Delay(3000);
 
+            GetAllScenes();
+            await Delay(1500);
             new MainMenu(this).OpenMenu();
         }
 
@@ -63,9 +64,20 @@ namespace ScenarioCreatorClient
 
             BaseScript.TriggerServerEvent("scenarioCreator:requestDeleteScene", sceneId);
         }
-        public void RequestCreateNewScene( ) 
+        public async void RequestCreateNewScene( ) 
         {
-
+            var result = await CommonFunctions.GetUserInput(windowTitle: "Enter scene Name");
+            // If the result was not invalid.
+            if (!string.IsNullOrEmpty(result))
+            {
+                TriggerServerEvent("scenarioCreator:createScene", result);
+            }
+            // Result was invalid.
+            else
+            {
+                Notify.Error(CommonErrors.InvalidInput);
+                return;
+            }
         }
 
         public void GetAllScenes()

@@ -20,7 +20,7 @@ namespace ScenarioCreatorClient.Classes
         public override string Model  { get; set; }
         public override Vector3 Position  { get; set; }
         public override Vector3 Rotation  { get; set; }
-        public override Entity localEntity { get; set; }
+        public override int localEntityId { get; set; }
         public override int netEntityId { get; set; }
 
         public int AttachedToPedId  { get; }
@@ -52,8 +52,8 @@ namespace ScenarioCreatorClient.Classes
             int modelHash = GetHashKey( Model ); 
             await Utils.LoadEntityModel( (uint)modelHash );
 
-            var localEntityId = CreateObject( modelHash, Position.X, Position.Y, Position.Z, true, true, true);
-            localEntity = Entity.FromHandle(localEntityId);
+            var locEntId = CreateObject( modelHash, Position.X, Position.Y, Position.Z, true, true, true);
+            localEntityId = locEntId;
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
 
             while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {

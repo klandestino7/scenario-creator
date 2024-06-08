@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 
 using Newtonsoft.Json;
+using ScenarioCreatorShared;
 
 using static CitizenFX.Core.Native.API;
 
@@ -32,11 +33,15 @@ namespace ScenarioCreatorClient.Classes
 
         public int entitiesCount = 0;
 
-        public Scene(int id, string name, dynamic vehicles, dynamic peds, dynamic props)
+        public Scene(int id, string name, List<ScenarioVehicle> vehicles, List<ScenarioPed> peds, List<ScenarioProp> props)
         {
             Id = id;
             Name = name;
-            
+
+            if ( peds != null ) {
+                InstantiatePeds( peds );
+            }
+
             if ( props != null ) {
                 InstantiateProps( props );
             }
@@ -45,10 +50,6 @@ namespace ScenarioCreatorClient.Classes
                 InstantiateVehicles( vehicles );
             }
             
-            if ( peds != null ) {
-                InstantiatePeds( peds );
-            }
-
             Vehicles = new List<EntityVehicle>() { };
             Props = new List<EntityProp>() { };
             Peds = new List<EntityPed>() { };
@@ -112,28 +113,34 @@ namespace ScenarioCreatorClient.Classes
 
         void _addPropToScene( EntityProp p, int localId = -1 ) 
         {
-            p.localEntity = Entity.FromHandle( localId );
+            p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
             Props.Add( p );
             Entities[localId]= p.Id;
             entitiesCount += 1;
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPropToScene", 1024, Id, JsonConvert.SerializeObject(p));
         }
         void _addPedToScene( EntityPed p, int localId = -1 )
         {
-            p.localEntity = Entity.FromHandle( localId );
+            p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
             Peds.Add( p );
             Entities[localId]= p.Id;
             entitiesCount += 1;
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPedToScene", 1024, Id, JsonConvert.SerializeObject(p));
         }
 
         void _addVehicleToScene( EntityVehicle v, int localId = -1 )
         {
-            v.localEntity = Entity.FromHandle( localId );
+            v.localEntityId = localId;
             v.netEntityId = NetworkGetNetworkIdFromEntity( localId );
             Vehicles.Add( v );
             Entities[localId]= v.Id;
             entitiesCount += 1;
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addVehicleToScene", 1024, Id, JsonConvert.SerializeObject(v));
         }
 
         public void AddPropToScene( EntityProp v, int localId ) 
@@ -181,6 +188,19 @@ namespace ScenarioCreatorClient.Classes
             return entityFound;
         }
 
+        public List<EntityBase> GetEntities()
+        {
+            List<EntityBase> _entities = new List<EntityBase>( ) {};
+
+            foreach (var item in Entities)
+            {
+                EntityBase foundObj = GetEntityInstanceFromHandleId( item.Key );
+                _entities.Add( foundObj );
+            }
+
+            return _entities;
+        }
+
         public void DeleteEntityFromHandleId(int entityId)
         {
             EntityBase _entity = GetEntityInstanceFromHandleId( entityId );
@@ -204,7 +224,7 @@ namespace ScenarioCreatorClient.Classes
 
         public void ForceSaveScene() 
         {
-            BaseScript.TriggerLatentServerEvent("scenarioCreator:forceSaveScene", 1024, Id, JsonConvert.SerializeObject(Peds), JsonConvert.SerializeObject(Props), JsonConvert.SerializeObject(Vehicles));
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:forceSaveScene", 1024, Id, Vehicles);
         }
 
         public void BeforeDestroy()
