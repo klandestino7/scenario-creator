@@ -28,6 +28,7 @@ namespace ScenarioCreatorClient
         WalkingStyleNotForMale,
         WalkingStyleNotForFemale,
         RightAlignedNotSupported,
+        InvalidEntity,
     };
 
     /// <summary>
@@ -50,6 +51,7 @@ namespace ScenarioCreatorClient
                 CommonErrors.NeedToBeTheDriver => "You need to be the driver of this vehicle.",
                 CommonErrors.NoVehicle => $"You need to be inside a vehicle{placeholder}.",
                 CommonErrors.NotAllowed => $"You are not allowed to{placeholder}, sorry.",
+                CommonErrors.InvalidEntity => $"This entity cant be edited.",
                 CommonErrors.InvalidModel => $"This model~r~{placeholder} ~s~could not be found, are you sure it's valid?",
                 CommonErrors.InvalidInput => $"The input~r~{placeholder} ~s~is invalid or you cancelled the action, please try again.",
                 CommonErrors.InvalidSaveName => $"Saving failed because the provided save name~r~{placeholder} ~s~is invalid.",
