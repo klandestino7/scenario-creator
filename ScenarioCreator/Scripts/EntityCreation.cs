@@ -14,6 +14,7 @@ namespace ScenarioCreatorClient.Scripts
         #region Variables
         public static bool Active { get; private set; } = false;
         public static Entity CurrentEntity { get; private set; } = null;
+        public static bool IsCreationMode { get; private set; } = false;
         private int scaleform = 0;
         private readonly float rotateSpeed = 20f;
         #endregion
@@ -102,6 +103,7 @@ namespace ScenarioCreatorClient.Scripts
 
             SetEntityAsMissionEntity(handle, true, true); // Set As mission to prevent despawning
 
+            IsCreationMode = true;
             Active = true;
         }
 
@@ -117,6 +119,15 @@ namespace ScenarioCreatorClient.Scripts
             CurrentEntity.Delete();
             CurrentEntity = null;
         }
+
+        public static void SetHandleMoveStatus( bool status )
+        {
+            Active = status;
+        } 
+        public static void SetCurrentEntity( Entity newEntity )
+        {
+            CurrentEntity = newEntity;
+        } 
 
         /// <summary>
         /// Method used to confirm location of prop and finish placement
@@ -138,7 +149,16 @@ namespace ScenarioCreatorClient.Scripts
                 CurrentEntity = null;
             }
 
-            TriggerEvent("scenarioCreator:entitySpawnedOnScene", cachedEntity);
+            if ( IsCreationMode ) 
+            {
+                TriggerEvent("scenarioCreator:entitySpawnedOnScene", cachedEntity);
+                IsCreationMode = false;
+            }
+            else
+            {
+                TriggerEvent("scenarioCreator:updateEntityPosition", cachedEntity);
+            }
+
             cachedEntity = 0;
         }
 

@@ -34,6 +34,7 @@ namespace ScenarioCreatorClient.Classes
         public bool IsInvincible  { get; }
 
         public EntityPed(
+            bool createEntity,
             int id,
             string model,
             Vector3 position,
@@ -62,6 +63,11 @@ namespace ScenarioCreatorClient.Classes
             Relationship = relationship;
             IsFreezed = isFreezed;
             IsInvincible = isInvincible;
+            
+            if ( createEntity ) 
+            {
+                // BeforeInitialization();
+            }
         }
 
         public override async void BeforeInitialization()
@@ -73,27 +79,31 @@ namespace ScenarioCreatorClient.Classes
 
             SetEntityRotation( localEntityId, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
 
-            localEntity = Entity.FromHandle(localEntityId);
+            localEntity = Entity.FromHandle( localEntityId );
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
+
+            while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
+                await Task.Delay(100);
+            }
         }
 
         public void StopPedActions()
         {
-            var lEntity = GetEntity();
+            var lEntity = GetLocalEntity();
             ClearPedTasksImmediately( lEntity.Handle );
             FreezeEntityPosition( lEntity.Handle, true );
         }
 
         public void ResetPed()
         {
-            var lEntity = GetEntity();
+            var lEntity = GetLocalEntity();
             SetEntityCoords( lEntity.Handle, Position.X, Position.Y, Position.Z, true, false, false, false);
             SetEntityRotation( lEntity.Handle, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
         }
 
         public void PlayPedActions() 
         {
-            var lEntity = GetEntity();
+            var lEntity = GetLocalEntity();
 
         }
 

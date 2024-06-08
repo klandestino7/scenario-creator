@@ -18,30 +18,70 @@ namespace ScenarioCreatorClient
     {
         public int CurrentSceneSelectedId;
 
+        public SceneScript sceneScript;
+
         #region Variables
         public static bool DebugMode = true; // GetResourceMetadata(GetCurrentResourceName(), "client_debug_mode", 0) == "true";
+        public List<ScenarioList> _scenarios;
         #endregion
+
+        
+        public class ScenarioList {
+            public int id { get; set; }
+            public string name { get; set; }
+        }
 
         /// <summary>
         /// Constructor.
         /// </summary>
         public MainScript()
         {
+            _scenarios = new List<ScenarioList>() { };
             RegisterEventMethods();
             RegisterCommands();
         }
 
-        private void RegisterEventMethods() 
+        private async void RegisterEventMethods() 
         {
-            // EventHandlers["onClientResourceStart"] += new Action<string>(OnClientResourceStart);
+            GetAllScenes();
+        
+            await Delay(1500);
+
+            new MainMenu(this).OpenMenu();
         }
 
         private void RegisterCommands()
         {
-            RegisterCommand("openMenu", new Action<int, List<object>>((source, args) =>
+        }
+
+        public void SelectScene(int sceneId)
+        {
+            sceneScript.InitializeSceneFromId( sceneId );
+        }
+        public void RequestDeleteScene( int sceneId ) 
+        {
+
+            BaseScript.TriggerServerEvent("scenarioCreator:requestDeleteScene", sceneId);
+        }
+        public void RequestCreateNewScene( ) 
+        {
+
+        }
+
+        public void GetAllScenes()
+        {
+            Func<string, string> CallbackFunction = (data) =>
             {
-                new MainMenu(this).OpenMenu();
-            }), false);
+                var scenarios = JsonConvert.DeserializeObject<List<ScenarioList>>(data);
+
+                foreach (var scenario in scenarios)
+                {
+                    _scenarios.Add(scenario);
+                }
+
+                return "";
+            };
+            BaseScript.TriggerServerEvent("scenarioCreator:getAllScenes", 1, CallbackFunction);
         }
     }
 }

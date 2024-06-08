@@ -28,6 +28,7 @@ namespace ScenarioCreatorClient.Classes
         public dynamic PedDriverMetadata  { get; }
 
         public EntityVehicle(
+            bool createEntity,
             int id,
             string model,
             Vector3 position,
@@ -46,15 +47,38 @@ namespace ScenarioCreatorClient.Classes
             Plate = plate;
             PedDriver = pedDriver;
             PedDriverMetadata = pedDriverMetadata;
+
+            if ( createEntity ) 
+            {
+                // BeforeInitialization();
+            }
         }
+
         public override async void BeforeInitialization()
         {
+            await Task.Delay(3000);
+            Debug.WriteLine($" BeforeInitialization :: ");
             int modelHash = GetHashKey( Model ); 
+
+            if (!IsModelValid((uint)modelHash))
+            {
+                Notify.Error(CommonErrors.InvalidInput);
+                return;
+            }
+
             await Utils.LoadEntityModel( (uint)modelHash );
 
-            var localEntityId = await CommonFunctions.SpawnVehicle( (uint)modelHash, false, false, skipLoad: false, vehicleInfo: new CommonFunctions.VehicleInfo(), saveName: null, Position.X, Position.Y, Position.Z, Game.PlayerPed.Heading);
+            Debug.WriteLine($" BeforeInitialization :: LoadEntityModel ");
+
+            var localEntityId = await CommonFunctions.SpawnVehicle( (uint)modelHash, false, false, skipLoad: false, vehicleInfo: new CommonFunctions.VehicleInfo(), saveName: null, Position.X, Position.Y, Position.Z, Rotation.Z);
+
+            Debug.WriteLine($" BeforeInitialization :: SpawnVehicle {localEntityId}");
             localEntity = Entity.FromHandle(localEntityId);
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
+            
+            while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
+                await Task.Delay(100);
+            }
         }
         
         public override void DrawOnWorld()
