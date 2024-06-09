@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
-namespace ScenarioCreatorClient.Scripts
+namespace ScenarioCreatorClient
 {
     internal class Utils : BaseScript
     {
@@ -53,12 +53,8 @@ namespace ScenarioCreatorClient.Scripts
             {
                 await Delay(1);
             }
-            if (IsModelAPed(hashModel))
-            {
-                return true;
-            }
 
-            return false;
+            return true;
         }
 
         public static RaycastResult GetPlayerRayCastResult() 

@@ -8,7 +8,6 @@ using CitizenFX.Core;
 
 using Newtonsoft.Json.Serialization;
 
-using ScenarioCreatorClient.Scripts;
 
 using static CitizenFX.Core.Native.API;
 
@@ -26,7 +25,6 @@ namespace ScenarioCreatorClient.Classes
         public int AttachedToPedId  { get; }
         public dynamic AttachedMetadata  { get; }
         public EntityProp(
-            bool createEntity,
             int id,
             string model,
             Vector3 position,
@@ -41,11 +39,6 @@ namespace ScenarioCreatorClient.Classes
             Rotation = rotation;
             AttachedToPedId = attachedToPedId;
             AttachedMetadata = attachedMetadata;
-            
-            if ( createEntity ) 
-            {
-                // BeforeInitialization();
-            }
         }
         public override async void BeforeInitialization()
         {
@@ -53,11 +46,13 @@ namespace ScenarioCreatorClient.Classes
             await Utils.LoadEntityModel( (uint)modelHash );
 
             var locEntId = CreateObject( modelHash, Position.X, Position.Y, Position.Z, true, true, true);
+            SetEntityRotation( locEntId, Rotation.X, Rotation.Y, Rotation.Z, 2, false);
+
             localEntityId = locEntId;
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
 
             while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
-                await Task.Delay(100);
+                await BaseScript.Delay(100);
             }
         }
 

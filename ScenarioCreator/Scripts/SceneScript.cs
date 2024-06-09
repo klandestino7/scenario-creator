@@ -9,7 +9,6 @@ using MenuAPI;
 using Newtonsoft.Json;
 
 using ScenarioCreatorClient.Classes;
-using ScenarioCreatorClient.Scripts;
 
 using ScenarioCreatorShared;
 
@@ -21,11 +20,9 @@ namespace ScenarioCreatorClient
     {
         private EntityListMenu _entityListMenu;
         private EntityMenu _entityMenu;
-        private SceneMenu _sceneMenu;
-        private Scene _currentScene;
-
-        private Scenario _currentSceneData; 
-
+        private static SceneMenu _sceneMenu;
+        public static Scene _currentScene = null;
+        private static Scenario _currentSceneData = null; 
         public bool editModeEnabled = false;
         public bool isSpawnEntityMode = false;
         private string _currentEntitySpawnModel;
@@ -54,6 +51,7 @@ namespace ScenarioCreatorClient
             EventHandlers["onResourceStop"] += new Action<string>(OnClientResourceStop);
             EventHandlers["scenarioCreator:entitySpawnedOnScene"] += new Action<int>(OnEntitySpawnedOnScene);
             EventHandlers["scenarioCreator:updateEntityPosition"] += new Action<int>(OnUpdateEnitityPosition);
+            EventHandlers["scenarioCreator:openMainSceneMenu"] += new Action(OpenMainSceneMenu);
         }
 
         private void OnClientResourceStop(string resourceName)
@@ -86,25 +84,23 @@ namespace ScenarioCreatorClient
 
             var entityType = GetEntityType( newEntity.Handle );
 
-            Debug.WriteLine(" OnEntitySpawnedOnScene :: ");
+            Debug.WriteLine($" OnEntitySpawnedOnScene :: ee {ent}");
 
             switch ( (eEntityTypeToClass)entityType ) 
             {
                 case eEntityTypeToClass.EntityPed:
                     var ped = new EntityPed(
-                        false,
                         _currentScene.entitiesCount + 1,
                         _currentEntitySpawnModel,
                         newEntity.Position,
                         newEntity.Rotation,
                         1
                     );
-                    _currentScene.AddPedToScene( ped, ent);
+                    _currentScene.AddPedToScene( ped, ent );
                 break;
 
                 case eEntityTypeToClass.EntityProp:
                     var prop = new EntityProp(
-                        false,
                         _currentScene.entitiesCount + 1,
                         _currentEntitySpawnModel,
                         newEntity.Position,
@@ -116,7 +112,6 @@ namespace ScenarioCreatorClient
                 case eEntityTypeToClass.EntityVehicle:
                     var vehicleplate = GetVehicleNumberPlateText( ent );
                     var veh = new EntityVehicle(
-                        true,
                         _currentScene.entitiesCount + 1,
                         _currentEntitySpawnModel,
                         newEntity.Position,
@@ -130,28 +125,44 @@ namespace ScenarioCreatorClient
             } 
         }
 
-        public void InitializeSceneFromId( int sceneId )
+        public static async void InitializeSceneFromId( int sceneId )
         {
+            Debug.WriteLine($" InitializeSceneFromId :: {sceneId}");
+            
             if ( _currentScene != null ) 
             {
                 _currentScene.BeforeDestroy();
                 _currentScene = null;
             }
+
+            SceneScript.GetSceneDataFromServer( sceneId );
+
         }
 
-         private void GetSceneDataFromServer(int sceneId)
+         private static void GetSceneDataFromServer(int sceneId)
         {
-            Func<Scenario, List<ScenarioPed>, List<ScenarioProp>, List<ScenarioVehicle>, string> CallbackFunction = (scenario, peds, props, vehicles) =>
+            
+            Func<string, string, string, string, string> CallbackFunction = (scenario, peds, props, vehicles) =>
             {
-                _currentSceneData = scenario;
+                Scenario _scenario = JsonConvert.DeserializeObject<Scenario>(scenario);
+                List<ScenarioPed> _peds = JsonConvert.DeserializeObject<List<ScenarioPed>>(peds);
+                List<ScenarioProp> _props = JsonConvert.DeserializeObject<List<ScenarioProp>>(props);
+                List<ScenarioVehicle> _vehicles = JsonConvert.DeserializeObject<List<ScenarioVehicle>>(vehicles);
+
+                _currentSceneData = _scenario;
+
+                Debug.WriteLine(" RODEI ESSA MERDA 1 :: ");
 
                 _currentScene = new Scene(
-                    scenario.Id,
-                    scenario.Name,
-                    vehicles,
-                    peds,
-                    props
+                    _scenario.Id,
+                    _scenario.Name,
+                    _vehicles,
+                    _peds,
+                    _props
                 );
+                Debug.WriteLine($" RODEI ESSA MERDA 2 :: {_currentScene}");
+
+                TriggerEvent("scenarioCreator:openMainSceneMenu");
                 return "";
             };
             BaseScript.TriggerServerEvent("scenarioCreator:getSceneDataFromDb", 1, sceneId, CallbackFunction);
@@ -166,7 +177,7 @@ namespace ScenarioCreatorClient
 
             if ( _currentScene == null )
             {
-                _currentScene = new Scene(1, "Cena Principal", null, null, null);
+                return;
             }
 
             _sceneMenu.OpenMenu();
@@ -229,10 +240,13 @@ namespace ScenarioCreatorClient
         {
             return false;
         }       
-        public async Task<bool> HandleSaveScene( ) 
+        public async Task<bool> HandleCloseScene( ) 
         {
-            _currentScene.ForceSaveScene();
-            return false;
+            _currentScene.BeforeDestroy();
+            _currentScene = null;
+
+            TriggerEvent("scenarioCreator:openMainMenu");
+            return true;
         }
 
         #endregion

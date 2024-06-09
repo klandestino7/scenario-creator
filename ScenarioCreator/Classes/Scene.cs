@@ -38,6 +38,11 @@ namespace ScenarioCreatorClient.Classes
             Id = id;
             Name = name;
 
+            Vehicles = new List<EntityVehicle>() { };
+            Props = new List<EntityProp>() { };
+            Peds = new List<EntityPed>() { };
+            Entities = new Dictionary<int, int>() { };
+
             if ( peds != null ) {
                 InstantiatePeds( peds );
             }
@@ -49,65 +54,75 @@ namespace ScenarioCreatorClient.Classes
             if ( vehicles != null ) {
                 InstantiateVehicles( vehicles );
             }
-            
-            Vehicles = new List<EntityVehicle>() { };
-            Props = new List<EntityProp>() { };
-            Peds = new List<EntityPed>() { };
-            Entities = new Dictionary<int, int>() { };
         }
 
-        private void InstantiateProps( dynamic props )
+        private void InstantiateProps( List<ScenarioProp> props )
         {
             foreach (var prop in props)
             {
-                _addPropToScene( new EntityProp( 
-                    true,
-                    prop["id"] == -1 ? Props.Count + 1 : prop["id"],
-                    prop["model"],
-                    prop["position"],
-                    prop["rotation"],
-                    prop["attachedToPedId"],
-                    prop["attachedMetadata"]
-                ));
+                var pp = new EntityProp( 
+                    prop.Id == -1 ? Props.Count + 1 : prop.Id,
+                    prop.Model,
+                    prop.Position,
+                    prop.Rotation,
+                    prop.AttachedToPedId,
+                    prop.AttachedMetadata
+                );
+
+                pp.BeforeInitialization();
+                
+                Props.Add( pp );
+                Entities[pp.localEntityId]= pp.Id;
+                entitiesCount += 1;
             }
         }
-        private void InstantiateVehicles( dynamic vehicles )
+        private void InstantiateVehicles( List<ScenarioVehicle> vehicles )
         {
             foreach (var vehicle in vehicles)
             {
-                _addVehicleToScene( new EntityVehicle( 
-                    true,
-                    vehicle["id"] == -1 ? Props.Count + 1 : vehicle["id"],
-                    vehicle["model"],
-                    vehicle["position"],
-                    vehicle["rotation"],
-                    vehicle["props"],
-                    vehicle["plate"],
-                    vehicle["pedDriver"],
-                    vehicle["pedDriverMetadata"]
-                ));
+                var veh = new EntityVehicle( 
+                    vehicle.Id == -1 ? Vehicles.Count + 1 : vehicle.Id,
+                    vehicle.Model,
+                    vehicle.Position,
+                    vehicle.Rotation,
+                    null,
+                    vehicle.Plate,
+                    vehicle.PedDriver,
+                    vehicle.PedDriverMetadata
+                );
+
+                veh.BeforeInitialization();
+
+                Vehicles.Add( veh );
+                Entities[veh.localEntityId]= veh.Id;
+                entitiesCount += 1;
             }
         }
-        private void InstantiatePeds( dynamic peds )
+        private void InstantiatePeds( List<ScenarioPed> peds )
         {
             foreach (var ped in peds)
             {
-                _addPedToScene( new EntityPed( 
-                    true,
-                    ped["id"] == -1 ? Props.Count + 1 : ped["id"],
-                    ped["model"],
-                    ped["position"],
-                    ped["rotation"],
-                    ped["outfitVariation"],
-                    ped["weaponModel"],
-                    ped["scenario"],
-                    ped["anim"],
-                    ped["dict"],
-                    ped["flags"],
-                    ped["relationship"],
-                    ped["isFreezed"],
-                    ped["isInvincible"]
-                ));
+                var pd = new EntityPed( 
+                    ped.Id == -1 ? Peds.Count + 1 : ped.Id,
+                    ped.Model,
+                    ped.Position,
+                    ped.Rotation,
+                    ped.OutfitVariation,
+                    ped.WeaponModel,
+                    ped.Scenario,
+                    ped.Anim,
+                    ped.Dict,
+                    ped.Flags,
+                    ped.Relationship,
+                    ped.IsFreezed,
+                    ped.IsInvincible
+                );
+
+                pd.BeforeInitialization();
+
+                Peds.Add( pd );
+                Entities[pd.localEntityId]= pd.Id;
+                entitiesCount += 1;
             }
         }
 
@@ -152,9 +167,9 @@ namespace ScenarioCreatorClient.Classes
         {
             _addPedToScene( v,localId );
         }
-        public void AddVehicleToScene( EntityVehicle v, int localId ) 
+        public void AddVehicleToScene( EntityVehicle veh, int localId ) 
         {
-            _addVehicleToScene ( v, localId );
+            _addVehicleToScene ( veh, localId );
         }
 
         public EntityBase GetEntityInstanceFromHandleId(int entityId)
@@ -230,9 +245,12 @@ namespace ScenarioCreatorClient.Classes
         public void BeforeDestroy()
         {
             StopScene();
+
+            Debug.WriteLine(" BeforeDestroy :: ");
             
             foreach (var entity in Entities)
             {
+                Debug.WriteLine($" entity.Key :: {entity.Key}");
                 EntityBase _entity = GetEntityInstanceFromHandleId( entity.Key );
                 _entity.BeforeDestroy();
                 entitiesCount -= 1;

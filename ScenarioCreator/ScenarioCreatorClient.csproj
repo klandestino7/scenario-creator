@@ -8,6 +8,7 @@
     <OutputPath>..\..\build\</OutputPath>
     <DefineConstants>CLIENT</DefineConstants>
     <LangVersion>latest</LangVersion>
+    <UserSecretsId>3976408b-496b-4f12-9482-89e4521d2162</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="data\**" />
@@ -28,7 +29,7 @@
 
     <Reference Include="Microsoft.CSharp" />
     
-    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.6370">
+    <PackageReference Include="CitizenFX.Core.Client" Version="1.0.8450">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     

@@ -12,7 +12,6 @@ using MenuAPI;
 using Newtonsoft.Json;
 
 using ScenarioCreatorShared;
-using ScenarioCreatorClient.Scripts;
 using CitizenFX.Core.Native;
 
 namespace ScenarioCreatorClient

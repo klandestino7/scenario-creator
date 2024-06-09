@@ -12,7 +12,6 @@ using MenuAPI;
 using Newtonsoft.Json;
 
 using ScenarioCreatorShared;
-using ScenarioCreatorClient.Scripts;
 
 namespace ScenarioCreatorClient
 {
@@ -56,6 +55,16 @@ namespace ScenarioCreatorClient
                 item.Enabled = false;
                 this.AddMenuItem(item);
             }
+
+            
+            this.OnMenuOpen += ( Menu m ) =>
+            {
+                if ( SceneScript._currentScene != null ) {
+                    m.CloseMenu();
+                    BaseScript.TriggerEvent("scenarioCreator:openMainSceneMenu");
+                }
+            };
+
 
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>

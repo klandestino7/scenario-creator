@@ -23,7 +23,7 @@ namespace ScenarioCreatorServer
             Debug.WriteLine($"MainServer INITIS");
             EventHandlers["scenarioCreator:getAllScenes"] += new Action<int, NetworkCallbackDelegate>(OnGetAllScenes);
             EventHandlers["scenarioCreator:getSceneDataFromDb"] += new Action<int, int, NetworkCallbackDelegate>(OnGetSceneFromDB);
-            EventHandlers["scenarioCreator:createScene"] += new Action<string>(OnCreateScene);
+            EventHandlers["scenarioCreator:createScene"] += new Action<string, NetworkCallbackDelegate>(OnCreateScene);
 
             EventHandlers["scenarioCreator:addVehicleToScene"] += new Action<int, string>(OnAddVehicleToScene);
             EventHandlers["scenarioCreator:addPropToScene"] += new Action<int, string>(OnAddPropToScene);
@@ -43,9 +43,10 @@ namespace ScenarioCreatorServer
             }
         }
 
-        public void OnCreateScene(string sceneName)
+        public void OnCreateScene(string sceneName, NetworkCallbackDelegate cbFunction)
         {
-            ScenarioRepository.CreateScene( sceneName );
+            int res = ScenarioRepository.CreateScene( sceneName );
+            cbFunction( res );
         }
 
         public void OnDeleteVehicle(int vehicleId) 
@@ -80,17 +81,17 @@ namespace ScenarioCreatorServer
 
         public void OnGetSceneFromDB(int playerId, int sceneId, NetworkCallbackDelegate cbFunction) 
         {
-            Scenario _scenario = ScenarioRepository.GetScenarioFromId( sceneId );
-            List<ScenarioPed> _peds = ScenarioRepository.GetAllPedsFromScenario( sceneId );
-            List<ScenarioProp> _props = ScenarioRepository.GetAllPropsFromScenario( sceneId );
-            List<ScenarioVehicle> _vehicles = ScenarioRepository.GetAllVehiclesFromScenario( sceneId );
-            cbFunction( _scenario, _peds, _props, _vehicles );
+            Scenario _scenario = ScenarioRepository.GetScenarioFromId( (int)sceneId  );
+            List<ScenarioPed> _peds = ScenarioRepository.GetAllPedsFromScenario( (int)sceneId );
+            List<ScenarioProp> _props = ScenarioRepository.GetAllPropsFromScenario( (int)sceneId  );
+            List<ScenarioVehicle> _vehicles = ScenarioRepository.GetAllVehiclesFromScenario( (int)sceneId  );
+            cbFunction( JsonConvert.SerializeObject(_scenario), JsonConvert.SerializeObject(_peds), JsonConvert.SerializeObject(_props), JsonConvert.SerializeObject(_vehicles) );
         }
 
         public void OnGetAllScenes(int playerId, NetworkCallbackDelegate cbFunction) 
         {
-            // List<Scenario> _scenarios = ScenarioRepository.GetAllScenes();
-            // cbFunction(_scenarios);
+            List<Scenario> _scenarios = ScenarioRepository.GetAllScenes();
+            cbFunction(JsonConvert.SerializeObject(_scenarios));
         }
 
     }

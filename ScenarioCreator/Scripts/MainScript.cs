@@ -8,8 +8,6 @@ using MenuAPI;
 
 using Newtonsoft.Json;
 
-using ScenarioCreatorClient.Scripts;
-
 using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient
@@ -17,8 +15,6 @@ namespace ScenarioCreatorClient
     public class MainScript : BaseScript
     {
         public int CurrentSceneSelectedId;
-
-        public SceneScript sceneScript;
 
         #region Variables
         public static bool DebugMode = true; // GetResourceMetadata(GetCurrentResourceName(), "client_debug_mode", 0) == "true";
@@ -37,18 +33,20 @@ namespace ScenarioCreatorClient
         public MainScript()
         {
             _scenarios = new List<ScenarioList>() { };
+            
+            OpenMainMenu();
             RegisterEventMethods();
             RegisterCommands();
         }
 
         private async void RegisterEventMethods() 
         {
-        
-            await Delay(3000);
+            EventHandlers["scenarioCreator:openMainMenu"] += new Action(OpenMainMenu);
+        }
 
+        public async void OpenMainMenu()
+        {
             GetAllScenes();
-            await Delay(1500);
-            new MainMenu(this).OpenMenu();
         }
 
         private void RegisterCommands()
@@ -57,7 +55,7 @@ namespace ScenarioCreatorClient
 
         public void SelectScene(int sceneId)
         {
-            sceneScript.InitializeSceneFromId( sceneId );
+           SceneScript.InitializeSceneFromId( sceneId );
         }
         public void RequestDeleteScene( int sceneId ) 
         {
@@ -70,7 +68,15 @@ namespace ScenarioCreatorClient
             // If the result was not invalid.
             if (!string.IsNullOrEmpty(result))
             {
-                TriggerServerEvent("scenarioCreator:createScene", result);
+                Func<int, string> CallbackFunction = (res) =>
+                {
+                    if ( res != null ) 
+                    {
+                        SceneScript.InitializeSceneFromId( res );
+                    }
+                    return "";
+                };
+                TriggerServerEvent("scenarioCreator:createScene", result, CallbackFunction);
             }
             // Result was invalid.
             else
@@ -88,9 +94,11 @@ namespace ScenarioCreatorClient
 
                 foreach (var scenario in scenarios)
                 {
+                    Debug.WriteLine($" SCENE :: {scenario.id}");
                     _scenarios.Add(scenario);
                 }
 
+                new MainMenu(this).OpenMenu();
                 return "";
             };
             BaseScript.TriggerServerEvent("scenarioCreator:getAllScenes", 1, CallbackFunction);

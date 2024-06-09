@@ -60,13 +60,6 @@ namespace ScenarioCreatorServer
             Debug.WriteLine($"MYSQL STATE :: {dbConn.State}");
 
             dbConn.Close();
-
-            GetAllScenes();
-
-            GetScenarioFromId( 1 );
-
-
-            // GetAllVehiclesFromScenario( 1 );
         }
 
         public static int CreateScene( string sceneName )
@@ -76,27 +69,25 @@ namespace ScenarioCreatorServer
                 sceneName
             );
             MySqlCommand cmd = new MySqlCommand(query, dbConn);
-            int id = (int)cmd.LastInsertedId;
 
             if (dbConn.State == System.Data.ConnectionState.Closed)
             {
                 dbConn.Open();
             }
             cmd.ExecuteNonQuery();
+            int id = (int)cmd.LastInsertedId;
+            
             dbConn.Close();
 
             return id;
         }
         public static List<Scenario> GetAllScenes()
         {
-            
-            Debug.WriteLine(" GetAllScenes :: ");
             List<Scenario> _scenarios = new List<Scenario>() { };
 
             try
             {
                 String query = "SELECT * FROM `scenario`";
-                Debug.WriteLine($" GetAllScenes :: {query}");
 
                 if (dbConn.State == System.Data.ConnectionState.Closed)
                 {
@@ -104,31 +95,23 @@ namespace ScenarioCreatorServer
                 }
 
                 MySqlCommand cmd = new MySqlCommand(query, dbConn);
-                Debug.WriteLine("CHEGUEI ");
 
                 MySqlDataReader reader = cmd.ExecuteReader();
 
-                Debug.WriteLine(reader[0]+" -- "+reader[1]);
-
                  while (reader.Read())
                 {
-                    Debug.WriteLine($" DKDKDOK SKD KSPPDOSKD ");
                     int id = Convert.ToInt32(reader["id"]);
-
-                    Debug.WriteLine($" DKDKDOK SKD KSPPDOSKD  :: {id}");
                     String name = reader["name"].ToString();
 
                     Scenario u = new Scenario(id, name);
 
                     _scenarios.Add(u);
-
                 }
     
                 reader.Close();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(" DEU MERDA AQUI :::: :: ");
                 Debug.WriteLine(ex.ToString());
             }
 
@@ -141,10 +124,8 @@ namespace ScenarioCreatorServer
             Scenario _scenario = null;
 
             String query = string.Format("SELECT * FROM scenario WHERE id={0}", sceneId);
-            Debug.WriteLine($" GetScenarioFromId :: {query}");
 
             MySqlCommand cmd = new MySqlCommand(query, dbConn);
-            Debug.WriteLine($" GetScenarioFromId :: cmd {cmd}");
     
             if (dbConn.State == System.Data.ConnectionState.Closed)
             {
@@ -152,16 +133,13 @@ namespace ScenarioCreatorServer
             }
 
             MySqlDataReader reader = cmd.ExecuteReader();
-            Debug.WriteLine($" GetScenarioFromId :: reader {reader}");
-    
 
             while (reader.Read())
             {
-            Debug.WriteLine($" GetScenarioFromId :: reader {reader["id"]}");
-                // int id = reader["id"];
+                int id = Convert.ToInt32(reader["id"]);
                 String name = reader["name"].ToString();
 
-                _scenario = new Scenario(1, name);
+                _scenario = new Scenario(id, name);
             }
 
             reader.Close();
@@ -173,54 +151,62 @@ namespace ScenarioCreatorServer
         {
             List<ScenarioPed> _scenarioPeds = new List<ScenarioPed>();
 
-            String query = string.Format("SELECT * FROM scenario_peds WHERE scenarioId={0}", sceneId);
+            try{
+                String query = string.Format("SELECT * FROM scenario_peds WHERE scenarioId={0}", sceneId);
 
-            MySqlCommand cmd = new MySqlCommand(query, dbConn);
+                MySqlCommand cmd = new MySqlCommand(query, dbConn);
+        
+                if (dbConn.State == System.Data.ConnectionState.Closed)
+                {
+                    dbConn.Open();
+                }
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    // int id = (int)reader["id"];
+                    // int scenarioId = reader["scenarioId"] != DBNull.Value ? Convert.ToInt32(reader["scenarioId"]) : 0;
+                    // String model = reader["model"].ToString();
+                    // Vector3 position = JsonConvert.DeserializeObject<Vector3>(reader["position"].ToString());
+                    // Vector3 rotation = JsonConvert.DeserializeObject<Vector3>(reader["rotation"].ToString());
+                    // int outfitVariation = (int)reader["outfitVariation"];
+                    // bool isFreezed = (bool)reader["isFreezed"];
+                    // bool isInvincible = (bool)reader["isInvincible"];
+                    // String scenario = reader["scenarioAnim"] != DBNull.Value ? reader["scenarioAnim"].ToString() : null;
+                    // String anim = reader["anim"] != DBNull.Value ? reader["anim"].ToString() : null;
+                    // String animDict = reader["animDict"] != DBNull.Value ? reader["animDict"].ToString() : null;
+                    // uint flags = reader["flags"] != DBNull.Value ? (uint)reader["flags"] : 0; ;
+                    // String relationship = reader["relationship"] != DBNull.Value ? reader["relationship"].ToString() : null;
+                    // String weaponModel = reader["weaponModel"] != DBNull.Value ? reader["weaponModel"].ToString() : null;
+
+                    // ScenarioPed u = new ScenarioPed(
+                    //     id,
+                    //     scenarioId,
+                    //     model,
+                    //     position,
+                    //     rotation,
+                    //     outfitVariation,
+                    //     isFreezed,
+                    //     isInvincible,
+                    //     scenario,
+                    //     anim,
+                    //     animDict,
+                    //     flags,
+                    //     relationship,
+                    //     weaponModel
+                    // );
+
+                    // _scenarioPeds.Add(u);
+                }
+
+                reader.Close();
+
+            }
+            catch (Exception ex) {
     
-            if (dbConn.State == System.Data.ConnectionState.Closed)
-            {
-                dbConn.Open();
+                Debug.WriteLine(ex.ToString());
             }
-
-            MySqlDataReader reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                Debug.WriteLine($" DKDKDOK SKD KSPPDOSKD ");
-                int id = (int)reader["id"];
-                String model = reader["model"].ToString();
-                Vector3 position = JsonConvert.DeserializeObject<Vector3>(reader["position"].ToString());
-                Vector3 rotation = JsonConvert.DeserializeObject<Vector3>(reader["rotation"].ToString());
-                int outfitVariation = (int)reader["outfitVariation"];
-                bool isFreezed = (bool)reader["isFreezed"];
-                bool isInvincible = (bool)reader["isInvincible"];
-                String scenario = reader["scenario"].ToString();
-                String anim = reader["anim"].ToString();
-                uint flags = (uint)reader["flags"];
-                String relationship = reader["relationship"].ToString();
-                String weaponModel = reader["weaponModel"].ToString();
-
-                ScenarioPed u = new ScenarioPed(
-                    id,
-                    sceneId,
-                    model,
-                    position,
-                    rotation,
-                    outfitVariation,
-                    isFreezed,
-                    isInvincible,
-                    scenario,
-                    anim,
-                    flags,
-                    relationship,
-                    weaponModel
-                );
-
-                _scenarioPeds.Add(u);
-            }
-
-            reader.Close();
-
             dbConn.Close();
 
             return _scenarioPeds;
@@ -246,8 +232,8 @@ namespace ScenarioCreatorServer
                 String model = reader["model"].ToString();
                 Vector3 position = JsonConvert.DeserializeObject<Vector3>(reader["position"].ToString());
                 Vector3 rotation = JsonConvert.DeserializeObject<Vector3>(reader["rotation"].ToString());
-                int attachedToPedId = (int)reader["attachedToPedId"];
-                String attachedMetadata = reader["attachedMetadata"].ToString();
+                int attachedToPedId = reader["attachedToPedId"] != DBNull.Value ? (int)reader["attachedToPedId"] : 0;
+                String attachedMetadata = reader["attachedMetadata"] != DBNull.Value ? reader["attachedMetadata"].ToString() : null;
 
                 ScenarioProp u = new ScenarioProp(
                     id,
@@ -286,24 +272,25 @@ namespace ScenarioCreatorServer
             while (reader.Read())
             {
                 int id = (int)reader["id"];
+                int scenarioId = reader["scenarioId"] != DBNull.Value ? Convert.ToInt32(reader["scenarioId"]) : 0;
                 String model = reader["model"].ToString();
                 Vector3 position = JsonConvert.DeserializeObject<Vector3>(reader["position"].ToString());
                 Vector3 rotation = JsonConvert.DeserializeObject<Vector3>(reader["rotation"].ToString());
                 String props = reader["props"].ToString();
                 String plate = reader["plate"].ToString();
-                int pedDriver = (int)reader["pedDriver"];
-                String attachedMetadata = reader["attachedMetadata"].ToString();
+                int pedDriver = reader["pedDriver"] != DBNull.Value ? (int)reader["pedDriver"] : 0;
+                String driverMetadata = reader["driverMetadata"] != DBNull.Value ? reader["driverMetadata"].ToString() : string.Empty;
 
                 ScenarioVehicle u = new ScenarioVehicle(
                     id,
-                    sceneId,
+                    scenarioId,
                     model,
                     position,
                     rotation,
                     props,
                     plate,
                     pedDriver,
-                    attachedMetadata
+                    driverMetadata
                 );
 
                 _scenarioVehicles.Add(u);
@@ -396,8 +383,6 @@ namespace ScenarioCreatorServer
             cmd.ExecuteNonQuery();
             dbConn.Close();
         }
-
-
         public static void AddVehiclesOnDBScene( int sceneId, List<ScenarioVehicle> vehicles )
         {
 
@@ -430,7 +415,7 @@ namespace ScenarioCreatorServer
         public static void DeleteVehicleFromDBScene( int vehicleId )
         {
             String query = string.Format("DELETE FROM scenario_vehicles WHERE vehicleId='{0}'", vehicleId );
-
+            QueryExecute(query);
         }
 
         private static MySqlCommand QueryExecute( string query )

@@ -12,7 +12,6 @@ using MenuAPI;
 using Newtonsoft.Json;
 
 using ScenarioCreatorShared;
-using ScenarioCreatorClient.Scripts;
 using CitizenFX.Core.Native;
 
 namespace ScenarioCreatorClient
@@ -55,7 +54,7 @@ namespace ScenarioCreatorClient
             sceneList.Add(new SceneList(3, "Start Scene", _script.HandleStartScene));
             sceneList.Add(new SceneList(4, "Stop Scene", _script.HandleStopScene));
             sceneList.Add(new SceneList(5, "Restart Scene", _script.HandleRestartScene));
-            sceneList.Add(new SceneList(6, "Save Scene", _script.HandleSaveScene));
+            sceneList.Add(new SceneList(6, "Close Scene", _script.HandleCloseScene));
 
             Update();
         }

@@ -8,7 +8,6 @@ using CitizenFX.Core;
 
 using Newtonsoft.Json.Serialization;
 
-using ScenarioCreatorClient.Scripts;
 
 using static CitizenFX.Core.Native.API;
 
@@ -22,18 +21,17 @@ namespace ScenarioCreatorClient.Classes
         public override Vector3 Rotation  { get; set; }
         public override int localEntityId { get; set; }
         public override int netEntityId { get; set; }
-        public Dictionary<string, int> Props  { get; }
+        public Dictionary<string, dynamic> Props  { get; }
         public string Plate  { get; }
         public int PedDriver  { get; }
         public dynamic PedDriverMetadata  { get; }
 
         public EntityVehicle(
-            bool createEntity,
             int id,
             string model,
             Vector3 position,
             Vector3 rotation,
-            Dictionary<string, int> props,
+            Dictionary<string, dynamic> props,
             string plate,
             int pedDriver = -1,
             dynamic pedDriverMetadata = null
@@ -47,40 +45,35 @@ namespace ScenarioCreatorClient.Classes
             Plate = plate;
             PedDriver = pedDriver;
             PedDriverMetadata = pedDriverMetadata;
-
-            if ( createEntity ) 
-            {
-                // BeforeInitialization();
-            }
         }
 
         public override async void BeforeInitialization()
         {
-            await Task.Delay(3000);
             Debug.WriteLine($" BeforeInitialization :: ");
-            int modelHash = GetHashKey( Model ); 
+            uint modelHash = (uint)GetHashKey( Model ); 
 
-            if (!IsModelValid((uint)modelHash))
+            if (!IsModelValid(modelHash))
             {
                 Notify.Error(CommonErrors.InvalidInput);
                 return;
             }
 
-            await Utils.LoadEntityModel( (uint)modelHash );
+            await Utils.LoadEntityModel( modelHash );
 
             Debug.WriteLine($" BeforeInitialization :: LoadEntityModel ");
 
-            var locEntId = await CommonFunctions.SpawnVehicle( (uint)modelHash, false, false, skipLoad: false, vehicleInfo: new CommonFunctions.VehicleInfo(), saveName: null, Position.X, Position.Y, Position.Z, Rotation.Z);
+            var locEntId = CreateVehicle(modelHash, Position.X, Position.Y, Position.Z, Rotation.Z, true, false);
 
             Debug.WriteLine($" BeforeInitialization :: SpawnVehicle {locEntId}");
             localEntityId = locEntId;
-            netEntityId = NetworkGetNetworkIdFromEntity( locEntId );
             
             while (NetworkGetNetworkIdFromEntity( locEntId ) == 0) {
-                await Task.Delay(100);
+                await BaseScript.Delay(100);
             }
-        }
         
+            netEntityId = NetworkGetNetworkIdFromEntity( locEntId );
+        }
+
         public override void DrawOnWorld()
         {
 

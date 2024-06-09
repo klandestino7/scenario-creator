@@ -9,7 +9,6 @@ using MenuAPI;
 
 using Newtonsoft.Json;
 
-using ScenarioCreatorClient.Scripts;
 
 using static CitizenFX.Core.Native.API;
 using static CitizenFX.Core.UI.Screen;

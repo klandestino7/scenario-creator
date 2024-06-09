@@ -30,6 +30,7 @@ namespace ScenarioCreatorShared
             bool isInvincible,
             string scenario,
             string anim,
+            string dict,
             uint flags,
             string relationship,
             string weaponModel
@@ -45,6 +46,7 @@ namespace ScenarioCreatorShared
             IsInvincible = isInvincible;
             Scenario = scenario;
             Anim = anim;
+            Dict = dict;
             Flags = flags;
             Relationship = relationship;
             WeaponModel = weaponModel;

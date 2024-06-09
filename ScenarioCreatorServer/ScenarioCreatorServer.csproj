@@ -24,11 +24,11 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     
-    <PackageReference Include="CitizenFX.Core.Server" Version="1.0.6335">
+    <PackageReference Include="CitizenFX.Core.Server" Version="1.0.8450">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     
-    <PackageReference Include="MySql.Data" Version="6.10.9" />
+    <PackageReference Include="MySql.Data" Version="8.0.32.1" />
     
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\dependencies\shared\Newtonsoft.Json.dll</HintPath>

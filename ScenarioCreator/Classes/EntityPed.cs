@@ -8,8 +8,6 @@ using CitizenFX.Core;
 
 using Newtonsoft.Json.Serialization;
 
-using ScenarioCreatorClient.Scripts;
-
 using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient.Classes
@@ -34,7 +32,6 @@ namespace ScenarioCreatorClient.Classes
         public bool IsInvincible  { get; }
 
         public EntityPed(
-            bool createEntity,
             int id,
             string model,
             Vector3 position,
@@ -63,11 +60,6 @@ namespace ScenarioCreatorClient.Classes
             Relationship = relationship;
             IsFreezed = isFreezed;
             IsInvincible = isInvincible;
-            
-            if ( createEntity ) 
-            {
-                // BeforeInitialization();
-            }
         }
 
         public override async void BeforeInitialization()
@@ -83,7 +75,7 @@ namespace ScenarioCreatorClient.Classes
             netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
 
             while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
-                await Task.Delay(100);
+                await BaseScript.Delay(100);
             }
         }
 

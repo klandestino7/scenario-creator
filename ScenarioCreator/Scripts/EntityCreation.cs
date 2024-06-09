@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using CitizenFX.Core;
 using static CitizenFX.Core.Native.API;
 
-namespace ScenarioCreatorClient.Scripts
+namespace ScenarioCreatorClient
 {
     internal class EntityCreation : BaseScript
     {
