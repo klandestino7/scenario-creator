@@ -43,7 +43,7 @@ namespace ScenarioCreatorClient
         public SceneScript(MainScript mainScript)
         {
             _mainScript = mainScript;
-            // RegisterEventMethods();
+            RegisterEventMethods();
 
             RegisterCommand("sceneMenu", new Action<int, List<object>>((source, args) =>
             {
