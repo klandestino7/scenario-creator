@@ -34,7 +34,8 @@
     </PackageReference>
     
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\dependencies\shared\Newtonsoft.Json.dll</HintPath>
+		
+		<HintPath>..\dependencies\shared\Newtonsoft.Json.dll</HintPath>
       <Private>true</Private>
     </Reference>
 

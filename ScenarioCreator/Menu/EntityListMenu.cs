@@ -6,6 +6,7 @@ using MenuAPI;
 
 using ScenarioCreatorShared;
 using ScenarioCreatorClient.Classes;
+using System;
 
 namespace ScenarioCreatorClient
 {
@@ -26,26 +27,41 @@ namespace ScenarioCreatorClient
             // this.InstructionalButtons.Add(Control.FrontendX, "Variation");
             // this.InstructionalButtons.Add(Control.FrontendY, "Accessory");
 
-            _entities = _script.GetEntitiesScene();
-
             Update();
         }
 
         internal void Update()
         {
             bool nextMenu = false;
-            int i = 1;
-            foreach (var s in _entities)
-            {
-                Debug.WriteLine($" ESSE ENT :: {s.Model}");
-                var item = new MenuItem(s.Model ?? $"Character #{i}");
-                
-                item.ItemData = s.localEntityId;
-                this.AddMenuItem(item);
-                i++;
-            }
 
+            Func<string> DrawMenuListAgain = () =>
+            {
+                int i = 1;
+                this.ClearMenuItems();
+                _entities = _script.GetEntitiesScene();
+                
+                foreach (var s in _entities)
+                {
+                    // Debug.WriteLine($" ESSE ENT :: {s.Model}");
+                    var item = new MenuItem($"[{s.Id}] {s.Model}");
+                    
+                    item.ItemData = s.localEntityId;
+                    this.AddMenuItem(item);
+                    i++;
+                }
+                
+                return "";
+            };
+
+            DrawMenuListAgain();
+            
             int lastEntity = 0;
+
+            this.OnMenuOpen += ( Menu m ) =>
+            {
+                nextMenu = false;
+                DrawMenuListAgain();
+            };
 
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
@@ -90,7 +106,7 @@ namespace ScenarioCreatorClient
                 _script.OpenEntityMenu( menuItem.ItemData );
             };
 
-            MenuController.AddMenu(this);
+            MenuController.AddSubmenu(_script.GetMainMenu(), this);
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
         }
 

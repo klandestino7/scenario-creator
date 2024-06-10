@@ -31,7 +31,7 @@ namespace ScenarioCreatorClient
         }
     }
 
-    internal class SceneMenu : Menu
+    public class SceneMenu : Menu
     {
         private readonly SceneScript _script;
         #region Variables;
@@ -105,7 +105,7 @@ namespace ScenarioCreatorClient
                 }
             };
 
-            MenuController.AddMenu(this);
+            MenuController.AddSubmenu(_script.GetMainMenu(), this);
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
         }
 

@@ -15,7 +15,7 @@ using ScenarioCreatorShared;
 
 namespace ScenarioCreatorClient
 {
-    internal class MainMenu : Menu
+    public class MainMenu : Menu
     {
         private readonly MainScript _script;
         #region Variables
@@ -37,34 +37,20 @@ namespace ScenarioCreatorClient
 
         internal void Update()
         {
-            if ( _script._scenarios.Count > 0 )
-            {
-                int i = 1;
-                foreach (var s in _script._scenarios)
-                {
-                    var item = new MenuItem(s.name);
-                    
-                    item.ItemData = s.id;
-                    this.AddMenuItem(item);
-                    i++;
-                }
-            }
-            else
-            {
-                var item = new MenuItem("Theres no scene created");
-                item.Enabled = false;
-                this.AddMenuItem(item);
-            }
-
             
             this.OnMenuOpen += ( Menu m ) =>
             {
-                if ( SceneScript._currentScene != null ) {
+                if ( _script._sceneScript._currentScene == null )
+                {
+                    _script.GetAllScenes();
+                }
+
+                if ( _script._sceneScript._currentScene != null ) {
                     m.CloseMenu();
-                    BaseScript.TriggerEvent("scenarioCreator:openMainSceneMenu");
+                    // BaseScript.TriggerEvent("scenarioCreator:openMainSceneMenu");
+                    _script.OpenMainSceneMenu();
                 }
             };
-
 
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
@@ -116,8 +102,8 @@ namespace ScenarioCreatorClient
             };
 
             MenuController.AddMenu(this);
+            MenuController.MainMenu = this;
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
-            MenuController.MenuToggleKey = Control.ReplayStartStopRecording;
             this.Visible = false;
         }
 

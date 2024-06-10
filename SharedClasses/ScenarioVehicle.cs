@@ -12,7 +12,7 @@ namespace ScenarioCreatorShared
         public string Props  { get; set; }
         public string Plate  { get; set; }
         public int PedDriver  { get; set; }
-        public string PedDriverMetadata  { get; set; }
+        public _PedDriverMetadata PedDriverMetadata  { get; set; }
     
         public ScenarioVehicle(
             int id, 
@@ -23,7 +23,7 @@ namespace ScenarioCreatorShared
             string props,
             string plate,
             int pedDriver,
-            string pedDriverMetadata
+            _PedDriverMetadata pedDriverMetadata
         )
         {
             Id = id;
@@ -37,5 +37,23 @@ namespace ScenarioCreatorShared
             PedDriverMetadata = pedDriverMetadata;
         }
     
+    }
+
+    public class _PedDriverMetadata
+    {
+        public int DriverStyle { get; set; }
+        public Vector3 ToPosition { get; set; }
+        public int MaxSpeed { get; set; }
+
+        public _PedDriverMetadata(
+            int driverStyle = 0,
+            Vector3 toPosition = new Vector3(),
+            int maxSpeed = 0
+        )
+        {
+            DriverStyle = driverStyle;
+            ToPosition = toPosition;
+            MaxSpeed = maxSpeed;
+        }
     }
 }

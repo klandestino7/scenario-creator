@@ -15,7 +15,7 @@ namespace ScenarioCreatorShared
         public string Scenario  { get; set; }
         public string Anim  { get; set; }
         public string Dict  { get; set; }
-        public uint Flags  { get; set; }
+        public int Flags  { get; set; }
         public string Relationship  { get; set; }
         public string WeaponModel  { get; set; }
 
@@ -31,7 +31,7 @@ namespace ScenarioCreatorShared
             string scenario,
             string anim,
             string dict,
-            uint flags,
+            int flags,
             string relationship,
             string weaponModel
         )

@@ -14,9 +14,11 @@ namespace ScenarioCreatorClient
 {
     public class MainScript : BaseScript
     {
-        public int CurrentSceneSelectedId;
-
         #region Variables
+        public SceneScript _sceneScript;
+        public static string MenuToggleKey { get; private set; } = "M"; // M by default
+        public int CurrentSceneSelectedId;
+        public MainMenu _mainMenu;
         public static bool DebugMode = true; // GetResourceMetadata(GetCurrentResourceName(), "client_debug_mode", 0) == "true";
         public List<ScenarioList> _scenarios;
         #endregion
@@ -35,18 +37,54 @@ namespace ScenarioCreatorClient
             _scenarios = new List<ScenarioList>() { };
             
             OpenMainMenu();
-            RegisterEventMethods();
             RegisterCommands();
+
+            if (!(CommonFunctions.GetSettingsString(Setting.smenu_menu_toggle_key) == null))
+            {
+                MenuToggleKey = CommonFunctions.GetSettingsString(Setting.smenu_menu_toggle_key);
+            }
+
+            _sceneScript = new SceneScript(this);
+            
+            RegisterEventMethods();
+        
+            _mainMenu = new MainMenu(this);
+            MenuController.AddMenu(_mainMenu);
+            MenuController.MainMenu = _mainMenu;
+            MenuController.MenuToggleKey = (Control)Int32.Parse(MenuToggleKey);
         }
 
-        private async void RegisterEventMethods() 
+
+        public void OpenMainSceneMenu()
+        {
+            _sceneScript.OpenMainSceneMenu();
+        }
+        private void RegisterEventMethods() 
         {
             EventHandlers["scenarioCreator:openMainMenu"] += new Action(OpenMainMenu);
+
+            EventHandlers["onClientResourceStop"] += new Action<string>(_sceneScript.OnClientResourceStop);
+            EventHandlers["onResourceStop"] += new Action<string>(_sceneScript.OnClientResourceStop);
+            EventHandlers["scenarioCreator:entitySpawnedOnScene"] += new Action<int>(_sceneScript.OnEntitySpawnedOnScene);
+            EventHandlers["scenarioCreator:updateEntityPosition"] += new Action<int>(_sceneScript.OnUpdateEnitityPosition);
+            EventHandlers["scenarioCreator:openMainSceneMenu"] += new Action(_sceneScript.OpenMainSceneMenu);
         }
 
         public async void OpenMainMenu()
         {
+            var res = await CommonFunctions.IsPlayerHasPermission("smenu.OpenMenu");
+            // Debug.WriteLine($" IsPlayerHasPermission :: {res}");
+
+            if (!res)
+            {
+                MenuController.MainMenu = null;
+                MenuController.DisableMenuButtons = true;
+                MenuController.DontOpenAnyMenu = true;
+                return;
+            }
+
             GetAllScenes();
+
         }
 
         private void RegisterCommands()
@@ -55,12 +93,28 @@ namespace ScenarioCreatorClient
 
         public void SelectScene(int sceneId)
         {
-           SceneScript.InitializeSceneFromId( sceneId );
+           _sceneScript.InitializeSceneFromId( sceneId );
         }
-        public void RequestDeleteScene( int sceneId ) 
+        public async void RequestDeleteScene( int sceneId ) 
         {
+            var res = await CommonFunctions.IsPlayerHasPermission("smenu.Scene.Delete");
 
-            BaseScript.TriggerServerEvent("scenarioCreator:requestDeleteScene", sceneId);
+            if (!res)
+            {
+                Notify.Error(CommonErrors.NotAllowed);
+                return;
+            }
+
+            Func<bool, bool> CallbackFunction = (res) =>
+            {
+                if ( res ) 
+                {
+                    GetAllScenes();
+                }
+                return true;
+            };
+
+            BaseScript.TriggerServerEvent("scenarioCreator:requestDeleteScene", sceneId, CallbackFunction);
         }
         public async void RequestCreateNewScene( ) 
         {
@@ -72,11 +126,15 @@ namespace ScenarioCreatorClient
                 {
                     if ( res != null ) 
                     {
-                        SceneScript.InitializeSceneFromId( res );
+                        _mainMenu.CloseMenu();
+                        _sceneScript.InitializeSceneFromId( res );
                     }
                     return "";
                 };
-                TriggerServerEvent("scenarioCreator:createScene", result, CallbackFunction);
+
+                Vector3 defaultPosition = Game.PlayerPed.Position;
+
+                TriggerServerEvent("scenarioCreator:createScene", result, JsonConvert.SerializeObject(defaultPosition), CallbackFunction);
             }
             // Result was invalid.
             else
@@ -88,18 +146,32 @@ namespace ScenarioCreatorClient
 
         public void GetAllScenes()
         {
-            Func<string, string> CallbackFunction = (data) =>
+            _scenarios = new List<ScenarioList>() { };
+
+            Func<string, bool> CallbackFunction = (data) =>
             {
                 var scenarios = JsonConvert.DeserializeObject<List<ScenarioList>>(data);
 
-                foreach (var scenario in scenarios)
+                _mainMenu.ClearMenuItems();
+
+                if ( scenarios.Count <= 0 )
                 {
-                    Debug.WriteLine($" SCENE :: {scenario.id}");
-                    _scenarios.Add(scenario);
+                    var item = new MenuItem("Theres no scene created");
+                    item.Enabled = false;
+                    _mainMenu.AddMenuItem(item);
+                    return true;
                 }
 
-                new MainMenu(this).OpenMenu();
-                return "";
+                foreach (var scenario in scenarios)
+                {
+                    // Debug.WriteLine($" SCENE :: {scenario.id}");
+                    var item = new MenuItem(scenario.name);
+                
+                    item.ItemData = scenario.id;
+                    _mainMenu.AddMenuItem(item);
+                }
+
+                return true;
             };
             BaseScript.TriggerServerEvent("scenarioCreator:getAllScenes", 1, CallbackFunction);
         }

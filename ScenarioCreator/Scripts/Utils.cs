@@ -37,7 +37,17 @@ namespace ScenarioCreatorClient
                 (float)Math.Sin(adj.X)
             );
         }
+        public static async Task<bool> LoadAnimDict( string animDict ) 
+        {
+            RequestAnimDict(animDict);
+            
+            while (!HasAnimDictLoaded(animDict))
+            {
+                await Delay(1);
+            }
 
+            return true;
+        }
         public static async Task<bool> LoadEntityModel( uint hashModel ) 
         {
 
@@ -105,7 +115,7 @@ namespace ScenarioCreatorClient
         {
             if (MainScript.DebugMode)
             {
-                Debug.WriteLine(@data);
+                // Debug.WriteLine(@data);
             }
         }
 

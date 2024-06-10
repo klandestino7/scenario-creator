@@ -8,6 +8,7 @@ using CitizenFX.Core;
 
 using Newtonsoft.Json.Serialization;
 
+using ScenarioCreatorShared;
 
 using static CitizenFX.Core.Native.API;
 
@@ -23,14 +24,14 @@ namespace ScenarioCreatorClient.Classes
         public override int netEntityId { get; set; }
 
         public int AttachedToPedId  { get; }
-        public dynamic AttachedMetadata  { get; }
+        public _AttachedMetadata AttachedMetadata  { get; }
         public EntityProp(
             int id,
             string model,
             Vector3 position,
             Vector3 rotation,
             int attachedToPedId = -1,
-            dynamic attachedMetadata = null
+            _AttachedMetadata attachedMetadata = null
         )
         {
             Id = id;
@@ -38,9 +39,9 @@ namespace ScenarioCreatorClient.Classes
             Position = position;
             Rotation = rotation;
             AttachedToPedId = attachedToPedId;
-            AttachedMetadata = attachedMetadata;
+            AttachedMetadata = new _AttachedMetadata(attachedMetadata?.Offset ?? new Vector3(), attachedMetadata?.Rotation ?? new Vector3(), attachedMetadata?.HasCollision ?? false);
         }
-        public override async void BeforeInitialization()
+        public override async Task<bool> BeforeInitialization()
         {
             int modelHash = GetHashKey( Model ); 
             await Utils.LoadEntityModel( (uint)modelHash );
@@ -49,11 +50,14 @@ namespace ScenarioCreatorClient.Classes
             SetEntityRotation( locEntId, Rotation.X, Rotation.Y, Rotation.Z, 2, false);
 
             localEntityId = locEntId;
-            netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
 
-            while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
+            while (NetworkGetNetworkIdFromEntity( locEntId ) == 0) {
                 await BaseScript.Delay(100);
             }
+            
+            netEntityId = NetworkGetNetworkIdFromEntity( locEntId );
+
+            return true;
         }
 
         // public override void BeforeDestroy()
@@ -64,10 +68,14 @@ namespace ScenarioCreatorClient.Classes
         //         }
         //     }
         // }
-        
-        public override void DrawOnWorld()
+    
+        public override void StartAct()
         {
-
+            
+        }
+        public override void StopAct()
+        {
+            
         }
     }
 }

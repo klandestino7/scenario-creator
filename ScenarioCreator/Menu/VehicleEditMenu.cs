@@ -13,12 +13,14 @@ using Newtonsoft.Json;
 
 using ScenarioCreatorShared;
 using CitizenFX.Core.Native;
+using ScenarioCreatorClient.Classes;
 
 namespace ScenarioCreatorClient
 {
 
-    internal class EntityMenu : Menu
+    internal class VehicleEditMenu : Menu
     {
+
         private readonly SceneScript _script;
         #region Variables;
 
@@ -26,17 +28,16 @@ namespace ScenarioCreatorClient
 
         #endregion
 
-        internal EntityMenu(SceneScript script, string name = Globals.ScriptName, string subtitle = "Scene Selected") : base(name, subtitle)
+        internal VehicleEditMenu(SceneScript script, EntityVehicle currentVehicle, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
         {
             _script = script;
-            // this.InstructionalButtons.Remove(Control.FrontendCancel);
-            // this.InstructionalButtons.Add(Control.FrontendX, "Variation");
-            // this.InstructionalButtons.Add(Control.FrontendY, "Accessory");
-
-            sceneList.Add(new SceneList(1, "Edit Entity", _script.HandleEditEntity));
-            sceneList.Add(new SceneList(2, "Delete Entity", _script.HandleDeleteEntity));
-            sceneList.Add(new SceneList(3, "Reset Entity", _script.HandleResetEntity));
-
+            
+            sceneList.Add(new SceneList(1, $"Ped driver {currentVehicle.PedDriver}", _script.DefinePedDriver));
+            sceneList.Add(new SceneList(2, $"Drive Style {currentVehicle.PedDriverMetadata.DriverStyle}", _script.DefineDriveStyle));
+            sceneList.Add(new SceneList(3, $"Max Speed {currentVehicle.PedDriverMetadata.MaxSpeed}", _script.DefineMaxSpeed));
+            sceneList.Add(new SceneList(4, $"To Position {currentVehicle.PedDriverMetadata.ToPosition}", _script.DefineToPosition));
+            
+            sceneList.Add(new SceneList(5, "Confirm Edit", _script.ConfirmEditsVehicle));
             Update();
         }
 
@@ -48,6 +49,7 @@ namespace ScenarioCreatorClient
             {
                 var item = new MenuItem(scene.Name);
                 
+                item.Description = "Press enter to change";
                 item.ItemData = scene.Handle;
                 this.AddMenuItem(item);
                 i++;
@@ -58,11 +60,7 @@ namespace ScenarioCreatorClient
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
             {
-                if ( inSelection )
-                {
-                    // _script.HandleEntityList();
-                }
-                inSelection = true; 
+                // _script.HandleEntityList();
             };
 
             this.OnIndexChange += async (Menu m, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex) =>
@@ -75,17 +73,9 @@ namespace ScenarioCreatorClient
             {
                 // sets selectModel to false, to allow exiting the method
                 var menuHandleResponse = await menuItem.ItemData();
-
-                // Debug.WriteLine( $" menuHandleResponse :: { menuHandleResponse }" );
-
-                if ( menuHandleResponse ) {
-                    m.Visible = false;
-                    m.CloseMenu();
-                    inSelection = false;
-                }
             };
 
-            MenuController.AddSubmenu(_script.GetMainMenu(), this);
+            MenuController.AddSubmenu(_script.GetSceneMenu(), this);
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
         }
 

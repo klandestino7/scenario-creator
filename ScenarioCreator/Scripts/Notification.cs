@@ -29,6 +29,7 @@ namespace ScenarioCreatorClient
         WalkingStyleNotForFemale,
         RightAlignedNotSupported,
         InvalidEntity,
+        CurrentSceneInvalid,
     };
 
     /// <summary>
@@ -63,6 +64,7 @@ namespace ScenarioCreatorClient
                 CommonErrors.WalkingStyleNotForMale => $"This walking style is not available for male peds.{placeholder}",
                 CommonErrors.WalkingStyleNotForFemale => $"This walking style is not available for female peds.{placeholder}",
                 CommonErrors.RightAlignedNotSupported => $"Right aligned menus are not supported for ultra wide aspect ratios.{placeholder}",
+                CommonErrors.CurrentSceneInvalid => $"Theres no scene selected",
                 _ => $"An unknown error occurred, sorry!{placeholder}",
             };
             return outputMessage;

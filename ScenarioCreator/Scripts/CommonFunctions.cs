@@ -15,8 +15,16 @@ using static CitizenFX.Core.UI.Screen;
 
 namespace ScenarioCreatorClient
 {
+    public enum Setting
+    {
+        smenu_menu_toggle_key,
+        smenu_start_scene,
+        smenu_stop_scene,
+        smenu_reset_scene,
+    }
     public static class CommonFunctions
     {
+        
         #region Variables
         private static string _currentScenario = "";
         private static Vehicle _previousVehicle;
@@ -595,5 +603,37 @@ namespace ScenarioCreatorClient
             return CitizenFX.Core.UI.Screen.StringToArray(inputString);
         }
         #endregion
+
+
+        public static async Task<bool> IsPlayerHasPermission( string permission ) 
+        {
+            var promise = new TaskCompletionSource<bool>();
+
+            Func<bool, bool>  CallbackFunction = (res) =>
+            {
+                return promise.TrySetResult(res);
+            };
+
+            BaseScript.TriggerServerEvent("scenarioCreator:isPlayerHasPermission", Game.Player.ServerId, permission, CallbackFunction);
+
+            return await promise.Task;
+        }
+
+
+        /// <summary>
+        /// Get a string setting.
+        /// </summary>
+        /// <param name="setting"></param>
+        /// <returns></returns>
+        public static string GetSettingsString(Setting setting, string defaultValue = null)
+        {
+            var value = GetConvar(setting.ToString(), defaultValue ?? "");
+            if (string.IsNullOrEmpty(value))
+            {
+                return null;
+            }
+            return value;
+        }
+
     }
 }

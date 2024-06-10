@@ -13,11 +13,6 @@ using static CitizenFX.Core.Native.API;
 
 namespace ScenarioCreatorClient.Classes
 {
-    public enum eEntityTypeToClass  {
-        EntityPed = 1,
-        EntityVehicle = 2,
-        EntityProp = 3
-    }
     public class Scene
     {
         public int Id { get; set; }
@@ -56,7 +51,7 @@ namespace ScenarioCreatorClient.Classes
             }
         }
 
-        private void InstantiateProps( List<ScenarioProp> props )
+        private async void InstantiateProps( List<ScenarioProp> props )
         {
             foreach (var prop in props)
             {
@@ -69,17 +64,19 @@ namespace ScenarioCreatorClient.Classes
                     prop.AttachedMetadata
                 );
 
-                pp.BeforeInitialization();
+                await pp.BeforeInitialization();
                 
                 Props.Add( pp );
                 Entities[pp.localEntityId]= pp.Id;
                 entitiesCount += 1;
             }
         }
-        private void InstantiateVehicles( List<ScenarioVehicle> vehicles )
+        private async void InstantiateVehicles( List<ScenarioVehicle> vehicles )
         {
             foreach (var vehicle in vehicles)
             {
+
+                Debug.WriteLine($" vehicle.PedDriverMetadata :: {vehicle.PedDriverMetadata}");
                 var veh = new EntityVehicle( 
                     vehicle.Id == -1 ? Vehicles.Count + 1 : vehicle.Id,
                     vehicle.Model,
@@ -91,14 +88,16 @@ namespace ScenarioCreatorClient.Classes
                     vehicle.PedDriverMetadata
                 );
 
-                veh.BeforeInitialization();
+                await veh.BeforeInitialization();
+
+                AddPedIntoVehicle( veh.localEntityId, vehicle.PedDriver );
 
                 Vehicles.Add( veh );
                 Entities[veh.localEntityId]= veh.Id;
                 entitiesCount += 1;
             }
         }
-        private void InstantiatePeds( List<ScenarioPed> peds )
+        private async void InstantiatePeds( List<ScenarioPed> peds )
         {
             foreach (var ped in peds)
             {
@@ -118,7 +117,7 @@ namespace ScenarioCreatorClient.Classes
                     ped.IsInvincible
                 );
 
-                pd.BeforeInitialization();
+                await pd.BeforeInitialization();
 
                 Peds.Add( pd );
                 Entities[pd.localEntityId]= pd.Id;
@@ -136,7 +135,7 @@ namespace ScenarioCreatorClient.Classes
 
             BaseScript.TriggerLatentServerEvent("scenarioCreator:addPropToScene", 1024, Id, JsonConvert.SerializeObject(p));
         }
-        void _addPedToScene( EntityPed p, int localId = -1 )
+        async void _addPedToScene( EntityPed p, int localId = -1 )
         {
             p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
@@ -158,6 +157,7 @@ namespace ScenarioCreatorClient.Classes
             BaseScript.TriggerLatentServerEvent("scenarioCreator:addVehicleToScene", 1024, Id, JsonConvert.SerializeObject(v));
         }
 
+
         public void AddPropToScene( EntityProp v, int localId ) 
         {
             _addPropToScene( v, localId );
@@ -172,6 +172,46 @@ namespace ScenarioCreatorClient.Classes
             _addVehicleToScene ( veh, localId );
         }
 
+        public void RemoveEntityFromScene( int localId )
+        {
+            var entityType = GetEntityType( localId );
+                // Debug.WriteLine($" RemoveEntityFromScene :: {localId} {entityType}");
+
+              switch( entityType ) {
+                case (int)Globals.eEntityTypeToClass.EntityPed:
+                    EntityPed foundPed = Peds.Find(p => p.localEntityId == localId);
+                    foundPed.PermanentDelete();
+                    Peds.Remove( foundPed );
+                break;
+
+                case (int)Globals.eEntityTypeToClass.EntityVehicle:
+                    EntityVehicle foundVehicle = Vehicles.Find(p => p.localEntityId == localId);
+                    foundVehicle.PermanentDelete();
+                    Vehicles.Remove( foundVehicle );
+                break;
+                
+                case (int)Globals.eEntityTypeToClass.EntityProp:
+                    EntityProp foundObj = Props.Find(p => p.localEntityId == localId);
+                    foundObj.PermanentDelete();
+                    Props.Remove( foundObj );
+                break;
+            }
+
+            Entities.Remove( localId );
+        }
+
+        public int GetIdEntityFromInternalId( int id ) 
+        {
+            foreach (var entity in Entities) {
+                if (entity.Value == id )
+                {
+                    return entity.Key;
+                }
+            }
+
+            return -1;
+        }
+
         public EntityBase GetEntityInstanceFromHandleId(int entityId)
         {
             Entities.TryGetValue(entityId, out int classId);
@@ -179,22 +219,22 @@ namespace ScenarioCreatorClient.Classes
 
             var idToFind = classId;
 
-            Debug.WriteLine($" GetEntityInstanceFromHandleId :: idToFind {idToFind}");
+            // Debug.WriteLine($" GetEntityInstanceFromHandleId :: idToFind {idToFind}");
 
             EntityBase entityFound = Peds.Find(p => p.Id == idToFind);
 
             switch( entityType ) {
-                case (int)eEntityTypeToClass.EntityPed:
+                case (int)Globals.eEntityTypeToClass.EntityPed:
                     EntityPed foundPed = Peds.Find(p => p.Id == idToFind);
                     entityFound = foundPed;
                 break;
 
-                case (int)eEntityTypeToClass.EntityVehicle:
+                case (int)Globals.eEntityTypeToClass.EntityVehicle:
                     EntityVehicle foundVehicle = Vehicles.Find(p => p.Id == idToFind);
                     entityFound = foundVehicle;
                 break;
                 
-                case (int)eEntityTypeToClass.EntityProp:
+                case (int)Globals.eEntityTypeToClass.EntityProp:
                     EntityProp foundObj = Props.Find(p => p.Id == idToFind);
                     entityFound = foundObj;
                 break;
@@ -203,6 +243,20 @@ namespace ScenarioCreatorClient.Classes
             return entityFound;
         }
 
+        public EntityVehicle GetVehicleInstanceFromEntityHandle( int entityId ) 
+        {
+            Debug.WriteLine($"GetVehicleInstanceFromEntityHandle :: {entityId}");
+            return Vehicles.Find(p => p.localEntityId == entityId);
+        }
+        public EntityPed GetPedInstanceFromEntityHandle( int entityId ) 
+        {
+            return Peds.Find(p => p.localEntityId == entityId);
+        }
+        public EntityProp GetPropInstanceFromEntityHandle( int entityId ) 
+        {
+            return Props.Find(p => p.localEntityId == entityId);
+        }
+        
         public List<EntityBase> GetEntities()
         {
             List<EntityBase> _entities = new List<EntityBase>( ) {};
@@ -216,25 +270,60 @@ namespace ScenarioCreatorClient.Classes
             return _entities;
         }
 
+        public void AddPedIntoVehicle( int locEntId, int pedDriver )
+        {
+            // Debug.WriteLine($" AddPedIntoVehicle {locEntId} - {pedDriver}");
+            if ( pedDriver != -1) 
+            {
+                int localPedId = GetIdEntityFromInternalId( pedDriver );
+
+                if ( localPedId != -1 && DoesEntityExist( localPedId ))
+                {
+                    TaskEnterVehicle( localPedId, locEntId, 10000, -1, 1.0f, 1, 0);
+                }
+            }
+        }
+
         public void DeleteEntityFromHandleId(int entityId)
         {
-            EntityBase _entity = GetEntityInstanceFromHandleId( entityId );
-            _entity.BeforeDestroy();
+
+        }
+        public void RestartScene()
+        {
+            StopScene();
+
+            foreach (var item in Entities)
+            {
+                EntityBase foundObj = GetEntityInstanceFromHandleId( item.Key );
+                foundObj.ResetEntity();
+            }
+
+            foreach ( var vehicle in Vehicles )
+            {
+                if ( vehicle.PedDriver != -1 )
+                {
+                    AddPedIntoVehicle( vehicle.localEntityId, vehicle.PedDriver );
+                }
+            }
         }
 
         public void StartScene()
         {
-
-        }
-
-        public void PauseScene()
-        {
-
+            foreach (var item in Entities)
+            {
+                EntityBase foundObj = GetEntityInstanceFromHandleId( item.Key );
+                foundObj.StartAct();
+            }
         }
 
         public void StopScene()
         {
 
+            foreach (var item in Entities)
+            {
+                EntityBase foundObj = GetEntityInstanceFromHandleId( item.Key );
+                foundObj.StopAct();
+            }
         }
 
         public void ForceSaveScene() 
@@ -242,15 +331,22 @@ namespace ScenarioCreatorClient.Classes
             BaseScript.TriggerLatentServerEvent("scenarioCreator:forceSaveScene", 1024, Id, Vehicles);
         }
 
+        public void PermanentDeleteEntityFromHandle( int entityId )
+        {   
+            EntityBase _entity = GetEntityInstanceFromHandleId( entityId );
+
+            _entity.BeforeDestroy();
+        }
+
         public void BeforeDestroy()
         {
             StopScene();
 
-            Debug.WriteLine(" BeforeDestroy :: ");
+            // Debug.WriteLine(" BeforeDestroy :: ");
             
             foreach (var entity in Entities)
             {
-                Debug.WriteLine($" entity.Key :: {entity.Key}");
+                // Debug.WriteLine($" entity.Key :: {entity.Key}");
                 EntityBase _entity = GetEntityInstanceFromHandleId( entity.Key );
                 _entity.BeforeDestroy();
                 entitiesCount -= 1;

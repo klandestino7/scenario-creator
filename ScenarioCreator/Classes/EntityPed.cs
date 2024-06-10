@@ -22,14 +22,14 @@ namespace ScenarioCreatorClient.Classes
         public override int netEntityId { get; set; }
 
         public int OutfitVariation  { get; }
-        public string WeaponModel  { get; }
-        public string Scenario  { get; }
-        public string Anim  { get; }
-        public string Dict  { get; }
-        public uint Flags  { get; }
-        public string Relationship  { get; }
-        public bool IsFreezed  { get; }
-        public bool IsInvincible  { get; }
+        public string WeaponModel  { get; set; }
+        public string Scenario  { get; set; }
+        public string Anim  { get; set; }
+        public string Dict  { get; set; }
+        public int Flags  { get; set; }
+        public string Relationship  { get; set; }
+        public bool IsFreezed  { get; set; }
+        public bool IsInvincible  { get; set; }
 
         public EntityPed(
             int id,
@@ -41,7 +41,7 @@ namespace ScenarioCreatorClient.Classes
             string scenario = "",
             string anim = "",
             string dict = "",
-            uint flags = 0,
+            int flags = 0,
             string relationship = "PLAYER",
             bool isFreezed = false,
             bool isInvincible = false
@@ -62,46 +62,109 @@ namespace ScenarioCreatorClient.Classes
             IsInvincible = isInvincible;
         }
 
-        public override async void BeforeInitialization()
+        public override async Task<bool> BeforeInitialization()
         {
             int modelHash = GetHashKey( Model ); 
             await Utils.LoadEntityModel( (uint)modelHash );
 
-            var locEntId = CreatePed(4, (uint)modelHash, Position.X, Position.Y, Position.Z, Rotation.Z, true, true);
+            var locEntId = CreatePed(4, (uint)modelHash, Position.X, Position.Y, Position.Z - 0.98f, Rotation.Z, true, true);
 
             SetEntityRotation( locEntId, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
 
-            localEntityId = localEntityId;
-            netEntityId = NetworkGetNetworkIdFromEntity( localEntityId );
+            localEntityId = locEntId;
 
-            while (NetworkGetNetworkIdFromEntity( localEntityId ) == 0) {
+            while (NetworkGetNetworkIdFromEntity( locEntId ) == 0) {
                 await BaseScript.Delay(100);
+            }
+            
+            netEntityId = NetworkGetNetworkIdFromEntity( locEntId );
+
+            AddWeaponToPed( locEntId );
+            AddToRelationship( locEntId );
+
+            return true;
+        }
+
+        public void AddToRelationship( int locEntId)
+        {
+            if ( Relationship != "") 
+            {
+                var gHash = (uint)GetHashKey(Relationship);
+                AddRelationshipGroup(Relationship, ref gHash);
+                SetPedRelationshipGroupHash( locEntId ,gHash);
+
+                var playerHash = (uint) GetHashKey("PLAYER");
+                SetRelationshipBetweenGroups(3, playerHash, gHash);
+                SetRelationshipBetweenGroups(3, gHash, playerHash);
+            }
+        }
+        public void AddWeaponToPed( int locEntId )
+        {
+            // Debug.WriteLine($" WeaponModel :: {WeaponModel }");
+            if ( WeaponModel != "WEAPON_UNARMED") 
+            {
+                var weaponModelHash = (uint)GetHashKey(WeaponModel );
+
+                if ( !IsWeaponValid( weaponModelHash )) {
+                    return;
+                }
+
+                // Debug.WriteLine($" GiveWeaponToPed :: {weaponModelHash }");
+                GiveWeaponToPed( locEntId, weaponModelHash, 300, false, true );
+                SetCurrentPedWeapon( locEntId, weaponModelHash, true);
             }
         }
 
-        public void StopPedActions()
+        public async void PlayPedActions() 
         {
             var lEntity = GetLocalEntity();
-            ClearPedTasksImmediately( lEntity.Handle );
-            FreezeEntityPosition( lEntity.Handle, true );
-        }
+            var isUsingScenario = Scenario != "";
 
-        public void ResetPed()
+            if ( isUsingScenario ) {
+                TaskStartScenarioInPlace( lEntity.Handle, Scenario, 0 , false );
+            }
+            else
+            {
+                if ( Dict != "")
+                {
+                    await Utils.LoadAnimDict( Dict );  
+                    TaskPlayAnim( lEntity.Handle, Dict, Anim, 8.0f, 8.0f, -1, (int)Flags, 1, false, false, false);
+                }
+            }
+        }
+        public void AddScenario(string scenario) {
+            Scenario = scenario;
+        }
+        public void AddAnimDict(string animDict) {
+            Dict = animDict;
+        }
+        public void AddAnimName(string anim) {
+            Anim = anim;
+        }
+        public void AddFlag(int flag) {
+            Flags = flag;
+        }
+        public void SetWeapon(string weapon) {
+            WeaponModel = weapon;
+        }
+        public void SetFreezed(bool freezed) {
+            IsFreezed = freezed;
+            var lEntity = GetLocalEntity();
+            FreezeEntityPosition( lEntity.Handle , freezed );
+        }
+        public void SetInvincible(bool invincible) {
+            IsInvincible = invincible;
+            var lEntity = GetLocalEntity();
+            SetEntityInvincible( lEntity.Handle , invincible );
+        }
+        public override void StartAct()
+        {
+            PlayPedActions();
+        }
+        public override void StopAct()
         {
             var lEntity = GetLocalEntity();
-            SetEntityCoords( lEntity.Handle, Position.X, Position.Y, Position.Z, true, false, false, false);
-            SetEntityRotation( lEntity.Handle, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
-        }
-
-        public void PlayPedActions() 
-        {
-            var lEntity = GetLocalEntity();
-
-        }
-
-        public override void DrawOnWorld()
-        {
-
+            ClearPedTasks( lEntity.Handle );
         }
     }
 }

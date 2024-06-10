@@ -31,5 +31,11 @@ namespace ScenarioCreatorShared
         /// The prefix used for commands exposed by the script
         /// </summary>
         public const string CommandPrefix = "scenariocreator_";
+
+        public enum eEntityTypeToClass  {
+            EntityPed = 1,
+            EntityVehicle = 2,
+            EntityProp = 3
+        }
     }
 }
