@@ -15,11 +15,10 @@ experimental_features_enabled '0'
 
 -- Files & scripts
 files {
-    'Newtonsoft.Json.dll',
-    'MenuAPI.dll',
-    'config/locations.json',
-    'config/addons.json',
+    "System.Numerics.dll",
+    'ScenarioCreator.net.deps.json',
+    'ScenarioCreatorServer.net.deps.json',
 }
 
-client_script 'ScenarioCreatorClient.net.dll'
+client_script 'ScenarioCreator.net.dll'
 server_script 'ScenarioCreatorServer.net.dll'
