@@ -33,9 +33,10 @@ namespace ScenarioCreatorClient
             // this.InstructionalButtons.Add(Control.FrontendX, "Variation");
             // this.InstructionalButtons.Add(Control.FrontendY, "Accessory");
 
-            sceneList.Add(new SceneList(1, "Edit Entity", _script.HandleEditEntity));
-            sceneList.Add(new SceneList(2, "Delete Entity", _script.HandleDeleteEntity));
-            sceneList.Add(new SceneList(3, "Reset Entity", _script.HandleResetEntity));
+            sceneList.Add(new SceneList(1, "Edit Params", _script.HandleEditEntity));
+            sceneList.Add(new SceneList(2, "Change Position", _script.HandleEditEntityPosition));
+            sceneList.Add(new SceneList(3, "Delete Entity", _script.HandleDeleteEntity));
+            sceneList.Add(new SceneList(4, "Reset Entity", _script.HandleResetEntity));
 
             Update();
         }

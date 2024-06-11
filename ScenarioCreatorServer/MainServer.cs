@@ -26,15 +26,17 @@ namespace ScenarioCreatorServer
             EventHandlers["scenarioCreator:getSceneDataFromDb"] += new Action<int, int, NetworkCallbackDelegate>(OnGetSceneFromDB);
             EventHandlers["scenarioCreator:createScene"] += new Action<string, string, NetworkCallbackDelegate>(OnCreateScene);
 
-            EventHandlers["scenarioCreator:addVehicleToScene"] += new Action<int, string>(OnAddVehicleToScene);
-            EventHandlers["scenarioCreator:addPropToScene"] += new Action<int, string>(OnAddPropToScene);
-            EventHandlers["scenarioCreator:addPedToScene"] += new Action<int, string>(OnAddPedToScene);
+            EventHandlers["scenarioCreator:addVehicleToScene"] += new Action<int, string, NetworkCallbackDelegate>(OnAddVehicleToScene);
+            EventHandlers["scenarioCreator:addPropToScene"] += new Action<int, string, NetworkCallbackDelegate>(OnAddPropToScene);
+            EventHandlers["scenarioCreator:addPedToScene"] += new Action<int, string, NetworkCallbackDelegate>(OnAddPedToScene);
             EventHandlers["scenarioCreator:saveVehiclesInScene"] += new Action<int, List<ScenarioVehicle>>(OnSaveVehiclesOnScene);
             EventHandlers["scenarioCreator:updateVehicle"] += new Action<int, string>(OnUpdateVehicleFromScene);
             EventHandlers["scenarioCreator:updatePed"] += new Action<int, string>(OnUpdatePedFromScene);
             EventHandlers["scenarioCreator:updateProp"] += new Action<int, string>(OnUpdatePropFromScene);
             // EventHandlers["scenarioCreator:deleteVehicle"] += new Action<int>(OnDeleteVehicle);
             EventHandlers["scenarioCreator:deleteEntity"] += new Action<int, int, NetworkCallbackDelegate>(OnDeleteEntity);
+
+            EventHandlers["scenarioCreator:updateEntityWorldPosition"] += new Action<int, Globals.eEntityTypeToClass, string, string>(OnUpdateEntityWorldPosition);
 
             _repository = new ScenarioRepository();
         }
@@ -82,21 +84,24 @@ namespace ScenarioCreatorServer
 
             cbFunction(true);
         }
-        public void OnAddPropToScene(int sceneId, string propJson) 
+        public void OnAddPropToScene(int sceneId, string propJson, NetworkCallbackDelegate cbFunction) 
         {
             ScenarioProp prop = JsonConvert.DeserializeObject<ScenarioProp>(propJson);
-            ScenarioRepository.AddPropOnDBScene( sceneId, prop );
+            int id = ScenarioRepository.AddPropOnDBScene( sceneId, prop );
+            cbFunction( id );
         }
-        public void OnAddPedToScene(int sceneId, string pedJson) 
+        public void OnAddPedToScene(int sceneId, string pedJson, NetworkCallbackDelegate cbFunction) 
         {
             ScenarioPed ped = JsonConvert.DeserializeObject<ScenarioPed>(pedJson);
-            ScenarioRepository.AddPedOnDBScene( sceneId, ped );
+            int id = ScenarioRepository.AddPedOnDBScene( sceneId, ped );
+            cbFunction( id );
         }
 
-        public void OnAddVehicleToScene(int sceneId, string vehicleJson) 
+        public void OnAddVehicleToScene(int sceneId, string vehicleJson, NetworkCallbackDelegate cbFunction) 
         {
             ScenarioVehicle vehicle = JsonConvert.DeserializeObject<ScenarioVehicle>(vehicleJson);
-            ScenarioRepository.AddVehicleOnDBScene( sceneId, vehicle );
+            int id = ScenarioRepository.AddVehicleOnDBScene( sceneId, vehicle );
+            cbFunction( id );
         }
         public void OnUpdateVehicleFromScene(int vehicleId, string vehicle ) 
         {
@@ -130,5 +135,23 @@ namespace ScenarioCreatorServer
             cbFunction(JsonConvert.SerializeObject(_scenarios));
         }
 
+        public void OnUpdateEntityWorldPosition(int entityId, Globals.eEntityTypeToClass entityType, string position, string rotation)
+        {
+            string entityDbTable = "empty_table";
+
+            switch ( entityType ) {
+                case Globals.eEntityTypeToClass.EntityPed:
+                    entityDbTable = "scenario_peds";
+                break;
+                case Globals.eEntityTypeToClass.EntityProp:
+                    entityDbTable = "scenario_props";
+                break;
+                case Globals.eEntityTypeToClass.EntityVehicle:
+                    entityDbTable = "scenario_vehicles";
+                break;
+            }
+
+            ScenarioRepository.UpdateEntityWorldPosition( entityId, entityDbTable, position, rotation);
+        }
     }
 }

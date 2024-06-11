@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 using CitizenFX.Core;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
 using ScenarioCreatorShared;
 
 using static CitizenFX.Core.Native.API;
@@ -55,7 +58,7 @@ namespace ScenarioCreatorClient.Classes
         public void ResetEntity()
         {
             var lEntity = GetLocalEntity();
-            SetEntityCoords( lEntity.Handle, Position.X, Position.Y, Position.Z - 0.98f, true, false, false, false);
+            SetEntityCoords( lEntity.Handle, Position.X, Position.Y, Position.Z, true, false, false, false);
             SetEntityRotation( lEntity.Handle, Rotation.X, Rotation.Y, Rotation.Z, 2, false );
         }
 
@@ -80,6 +83,15 @@ namespace ScenarioCreatorClient.Classes
             var entityStringType = (Globals.eEntityTypeToClass)entityType;
 
             BaseScript.TriggerServerEvent("scenarioCreator:deleteEntity", Id, entityStringType, CallbackFunction);
+        }
+
+        public void SaveWorldPositionOnDB()
+        {
+            var lEntity = GetLocalEntity();
+            var entityType = GetEntityType( lEntity.Handle );
+            var entityStringType = (Globals.eEntityTypeToClass)entityType;
+
+            BaseScript.TriggerServerEvent("scenarioCreator:updateEntityWorldPosition", Id, entityStringType, JsonConvert.SerializeObject(Position), JsonConvert.SerializeObject(Rotation));
         }
     }
 }

@@ -309,7 +309,7 @@ namespace ScenarioCreatorServer
 
             return _scenarioVehicles;
         }
-        public static void AddPropOnDBScene( int sceneId, ScenarioProp prop )
+        public static int AddPropOnDBScene( int sceneId, ScenarioProp prop )
         {
             // Debug.WriteLine($" AddPropOnDBScene :: {sceneId}");
 
@@ -330,10 +330,13 @@ namespace ScenarioCreatorServer
             {
                 dbConn.Open();
             }
+            
             cmd.ExecuteNonQuery();
+            int id = (int)cmd.LastInsertedId;
             dbConn.Close();
+            return id;
         }
-        public static void AddVehicleOnDBScene( int sceneId, ScenarioVehicle vehicle )
+        public static int AddVehicleOnDBScene( int sceneId, ScenarioVehicle vehicle )
         {
             // Debug.WriteLine($" AddVehicleOnDBScene :: {sceneId}");
 
@@ -357,9 +360,12 @@ namespace ScenarioCreatorServer
                 dbConn.Open();
             }
             cmd.ExecuteNonQuery();
+            int id = (int)cmd.LastInsertedId;
             dbConn.Close();
+
+            return id;
         }
-        public static void AddPedOnDBScene( int sceneId, ScenarioPed ped )
+        public static int AddPedOnDBScene( int sceneId, ScenarioPed ped )
         {
             // Debug.WriteLine($" AddPedOnDBScene :: {sceneId}");
 
@@ -388,7 +394,10 @@ namespace ScenarioCreatorServer
                 dbConn.Open();
             }
             cmd.ExecuteNonQuery();
+            int id = (int)cmd.LastInsertedId;
             dbConn.Close();
+
+            return id;
         }
         public static void AddVehiclesOnDBScene( int sceneId, List<ScenarioVehicle> vehicles )
         {
@@ -480,6 +489,27 @@ namespace ScenarioCreatorServer
         {
             String query = string.Format("DELETE FROM scenario_peds WHERE id='{0}'", pedId );
             QueryExecute(query);
+        }
+
+         public static void UpdateEntityWorldPosition( int entityId, string entityTable, string position, string rotation )
+        {
+            String query = string.Format(
+                "UPDATE {0} SET  position='{1}', rotation='{2}' WHERE id='{3}'", 
+                entityTable,
+                position,
+                rotation,
+                entityId
+            );
+
+            MySqlCommand cmd = new MySqlCommand(query, dbConn);
+
+            if (dbConn.State == System.Data.ConnectionState.Closed)
+            {
+                dbConn.Open();
+            }
+
+            cmd.ExecuteNonQuery();
+            dbConn.Close();
         }
         private static MySqlCommand QueryExecute( string query )
         {
