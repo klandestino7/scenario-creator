@@ -129,32 +129,47 @@ namespace ScenarioCreatorClient.Classes
         {
             p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
-            Props.Add( p );
-            Entities[localId]= p.Id;
-            entitiesCount += 1;
 
-            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPropToScene", 1024, Id, JsonConvert.SerializeObject(p));
+            Func<int, bool> CallbackFunction = (insertId) => {
+                p.Id = insertId;
+                Props.Add( p );
+                Entities[localId]= insertId;
+                entitiesCount += 1;
+                return true;
+            };
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPropToScene", 1024, Id, JsonConvert.SerializeObject(p), CallbackFunction);
         }
         async void _addPedToScene( EntityPed p, int localId = -1 )
         {
             p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
-            Peds.Add( p );
-            Entities[localId]= p.Id;
-            entitiesCount += 1;
 
-            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPedToScene", 1024, Id, JsonConvert.SerializeObject(p));
+            Func<int, bool> CallbackFunction = (insertId) => {
+                p.Id = insertId;
+                Peds.Add( p );
+                Entities[localId]= insertId;
+                entitiesCount += 1;
+                return true;
+            };
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addPedToScene", 1024, Id, JsonConvert.SerializeObject(p), CallbackFunction);
         }
 
         void _addVehicleToScene( EntityVehicle v, int localId = -1 )
         {
             v.localEntityId = localId;
             v.netEntityId = NetworkGetNetworkIdFromEntity( localId );
-            Vehicles.Add( v );
-            Entities[localId]= v.Id;
-            entitiesCount += 1;
 
-            BaseScript.TriggerLatentServerEvent("scenarioCreator:addVehicleToScene", 1024, Id, JsonConvert.SerializeObject(v));
+            Func<int, bool> CallbackFunction = (insertId) => {
+                v.Id = insertId;
+                Vehicles.Add( v );
+                Entities[localId]= insertId;
+                entitiesCount += 1;
+                return true;
+            };
+
+            BaseScript.TriggerLatentServerEvent("scenarioCreator:addVehicleToScene", 1024, Id, JsonConvert.SerializeObject(v), CallbackFunction);
         }
 
 
