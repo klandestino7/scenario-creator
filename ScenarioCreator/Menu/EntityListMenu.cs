@@ -73,7 +73,7 @@ namespace ScenarioCreatorClient
 
                 if ( lastEntity != 0 && DoesEntityExist( lastEntity )) 
                 {
-                    SetEntityDrawOutline( lastEntity , false );
+                    ResetEntityAlpha( lastEntity );
                 }
             };
 
@@ -83,14 +83,12 @@ namespace ScenarioCreatorClient
                 
                 if ( lastEntity != 0 && DoesEntityExist( lastEntity )) 
                 {
-                    SetEntityDrawOutline( lastEntity , false );
+                    ResetEntityAlpha( lastEntity );
                 }
             
                 if (newEntity != null && DoesEntityExist( newEntity ) )
                 {
-                    SetEntityDrawOutline( newEntity , true );
-                    SetEntityDrawOutlineColor( 20, 255, 20, 255 );
-                    SetEntityDrawOutlineShader( 0 );
+                    SetEntityAlpha( newEntity, 100, 0 );
                 }
 
                 lastEntity = newEntity;

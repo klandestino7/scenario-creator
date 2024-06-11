@@ -24,6 +24,7 @@ namespace ScenarioCreatorClient
         public EntityProp _currentPropEditMode;
         public EntityVehicle _currentVehicleEditMode;
         private EntityListMenu _entityListMenu;
+        private WorldPositionEditMenu _worldPositionEditMenu;
         private EntityMenu _entityMenu;
         private PedEditMenu _pedEditMenu;
         private VehicleEditMenu _vehicleEditMenu;
@@ -352,7 +353,7 @@ namespace ScenarioCreatorClient
         }       
         public async Task<bool> HandleEditEntity( ) 
         {
-            var res = await CommonFunctions.IsPlayerHasPermission("smenu.Entity.Add");
+            var res = await CommonFunctions.IsPlayerHasPermission("smenu.Entity.Edit");
 
             if (!res)
             {
@@ -364,7 +365,7 @@ namespace ScenarioCreatorClient
             {
                 var entityType = GetEntityType( selectedEntity );
 
-                Debug.WriteLine($"entityType :: {entityType}");
+                // Debug.WriteLine($"entityType :: {entityType}");
 
                 switch ( (Globals.eEntityTypeToClass)entityType ) 
                 {
@@ -384,6 +385,24 @@ namespace ScenarioCreatorClient
             }
             return false;
         }        
+        public async Task<bool> HandleEditEntityPosition( ) 
+        {
+            var res = await CommonFunctions.IsPlayerHasPermission("smenu.Entity.Edit");
+
+            if (!res)
+            {
+                Notify.Error(CommonErrors.NotAllowed);
+                return false;
+            }
+
+            if ( DoesEntityExist( selectedEntity ) )
+            {
+                OpenMenuToEditWorldPosition();
+                return true;
+            }
+            return false;
+        }    
+
         public async Task<bool> HandleResetEntity( ) 
         {
             var res = await CommonFunctions.IsPlayerHasPermission("smenu.Entity.Reset");
@@ -423,6 +442,8 @@ namespace ScenarioCreatorClient
         #region OpenMenu
         public void OpenEntityMenu( int entityId )
         {
+            Debug.WriteLine($" OpenEntityMenu :: { entityId }");
+
             if (_entityMenu == null)
             {
                 _entityMenu = new EntityMenu(this);
@@ -489,6 +510,22 @@ namespace ScenarioCreatorClient
 
             _vehicleEditMenu.OpenMenu();
         }
+
+        private void OpenMenuToEditWorldPosition()
+        {
+            var _currentEntityToChangePosition = _currentScene.GetEntityInstanceFromHandleId( selectedEntity );
+            
+            if ( _entityListMenu != null )
+            {
+                _entityListMenu.CloseMenu();
+            }
+            if (_worldPositionEditMenu == null)
+            {
+                _worldPositionEditMenu = new WorldPositionEditMenu(this, _currentEntityToChangePosition);
+            }
+
+            _worldPositionEditMenu.OpenMenu();
+        }
         #endregion
 
         private async Task<string> InputUserRequest(string title) 
@@ -502,6 +539,7 @@ namespace ScenarioCreatorClient
 
             return "";
         }
+        
 
         #region Ped Edit Methods
 
@@ -591,6 +629,7 @@ namespace ScenarioCreatorClient
             );
             BaseScript.TriggerLatentServerEvent("scenarioCreator:updatePed", 1024, _currentPedEditMode.Id, JsonConvert.SerializeObject(_ped));
             Notify.Success("Ped updated");
+            _pedEditMenu.Update();
             return true;
         }
 
@@ -665,12 +704,14 @@ namespace ScenarioCreatorClient
         /// Main tick method for class
         /// </summary>
 
+
         #region  Ticks
         int lastEntity;
         int selectedEntity;
         [Tick]
         internal async Task OnTickSelectEntity()
         {
+
             if ( editModeEnabled ) 
             {
                 var res = Utils.GetPlayerRayCastResult();
@@ -679,17 +720,14 @@ namespace ScenarioCreatorClient
                 {
                     if ( res.HitEntity.Handle != lastEntity )
                     {
-                        SetEntityDrawOutline( res.HitEntity.Handle , true );
-                        SetEntityDrawOutlineColor( 255, 20, 20, 255 );
-                        SetEntityDrawOutlineShader( 0 );
-
-                        SetEntityDrawOutline( lastEntity, false );
+                        SetEntityAlpha( res.HitEntity.Handle, 100, 0 );
+                        ResetEntityAlpha( lastEntity );
                         lastEntity = res.HitEntity.Handle;
                     }
                 } 
                 else
                 {
-                    SetEntityDrawOutline( lastEntity, false );
+                    ResetEntityAlpha( lastEntity );
                     lastEntity = 0;
                 }
             }
@@ -697,10 +735,11 @@ namespace ScenarioCreatorClient
             {
                 if (DoesEntityExist( lastEntity )) 
                 {
-                    SetEntityDrawOutline( lastEntity, false );
+                    ResetEntityAlpha( lastEntity );
                     lastEntity = 0;
                 }
             }
+
             await Task.FromResult(0);
         }
 
@@ -726,12 +765,7 @@ namespace ScenarioCreatorClient
                         lastEntity = 0;
                         return;
                     }
-
-
                     selectedEntity = entitySelected.localEntityId;
-                    SetEntityDrawOutlineColor( 20, 255, 20, 255 );
-
-                    // Debug.WriteLine(" ENTREI UMA VEZ :: ");
 
                     Entity locEnt = Entity.FromHandle( entitySelected.localEntityId ); 
 
