@@ -132,7 +132,9 @@ namespace ScenarioCreatorClient
                     return "";
                 };
 
-                Vector3 defaultPosition = Game.PlayerPed.Position;
+                Vector3 defaultPosition = await HandleToGetStartPosition();
+
+    
 
                 TriggerServerEvent("scenarioCreator:createScene", result, JsonConvert.SerializeObject(defaultPosition), CallbackFunction);
             }
@@ -142,6 +144,29 @@ namespace ScenarioCreatorClient
                 Notify.Error(CommonErrors.InvalidInput);
                 return;
             }
+        }
+
+        private async Task<Vector3> HandleToGetStartPosition() 
+        {
+            Vector3 spawnPosition = new Vector3( );
+
+            Notify.Info("Go to the scene start coordinate for the player spawn and press ENTER to confirm");
+
+            _mainMenu.CloseMenu();
+
+            while ( spawnPosition.IsZero ) {
+                
+                if ( Game.IsControlJustPressed(0, Control.FrontendAccept) )
+                {
+                    var playerPosition = Game.PlayerPed.Position;
+                    spawnPosition = new Vector3( playerPosition.X, playerPosition.Y, playerPosition.Z - 0.98f );
+
+                }
+                
+                await Delay(0);
+            }
+
+            return spawnPosition;
         }
 
         public void GetAllScenes()

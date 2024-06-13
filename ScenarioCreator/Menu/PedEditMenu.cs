@@ -18,7 +18,7 @@ using ScenarioCreatorClient.Classes;
 namespace ScenarioCreatorClient
 {
 
-    internal class PedEditMenu : Menu
+    public class PedEditMenu : Menu
     {
         enum eMenuItem {
             IsFreezed = 0,
@@ -31,6 +31,7 @@ namespace ScenarioCreatorClient
             Weapon = 7,
         }
         private readonly SceneScript _script;
+        private readonly EntityPed _currentPed;
         #region Variables;
 
         List<SceneList> sceneList = new List<SceneList>() { };
@@ -40,26 +41,30 @@ namespace ScenarioCreatorClient
         internal PedEditMenu(SceneScript script, EntityPed currentPed, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
         {
             _script = script;
+            _currentPed = currentPed;
 
-            MenuCheckboxItem isFreezedCheckbox = new MenuCheckboxItem($"Is Freezed {currentPed.IsFreezed}", "", currentPed.IsFreezed);
-            this.AddMenuItem(isFreezedCheckbox);
-
-            MenuCheckboxItem isInvincibleCheckbox = new MenuCheckboxItem($"Is Invincible {currentPed.IsInvincible}", "", currentPed.IsInvincible);
-            this.AddMenuItem(isInvincibleCheckbox);
-            
-            sceneList.Add(new SceneList(2, $"Scenario {currentPed.Scenario}", _script.DefineScenarioToPed));
-            sceneList.Add(new SceneList(3, $"Anim {currentPed.Anim}", _script.DefineAnimationToPed));
-            sceneList.Add(new SceneList(4, $"Anim Dict {currentPed.Dict}", _script.DefineAnimationDictToPed));
-            sceneList.Add(new SceneList(5, $"Flags {currentPed.Flags}", _script.DefineFlagsToPed));
-            sceneList.Add(new SceneList(6, $"Relationship {currentPed.Relationship}", _script.DefineRelationShip));
-            sceneList.Add(new SceneList(7, $"Weapon {currentPed.WeaponModel}", _script.DefineWeapon));
-
-            sceneList.Add(new SceneList(8, "Confirm Edit", _script.ConfirmEditsPed));
             Update();
         }
 
         internal void Update()
         {
+            this.ClearMenuItems();
+            sceneList = new List<SceneList>() { }; 
+            
+            MenuCheckboxItem isFreezedCheckbox = new MenuCheckboxItem($"Is Freezed {_currentPed.IsFreezed}", "", _currentPed.IsFreezed);
+            this.AddMenuItem(isFreezedCheckbox);
+
+            MenuCheckboxItem isInvincibleCheckbox = new MenuCheckboxItem($"Is Invincible {_currentPed.IsInvincible}", "", _currentPed.IsInvincible);
+            this.AddMenuItem(isInvincibleCheckbox);
+
+            sceneList.Add(new SceneList(2, $"Scenario {_currentPed.Scenario}", _script.DefineScenarioToPed));
+            sceneList.Add(new SceneList(3, $"Anim {_currentPed.Anim}", _script.OpenAnimationMenu));
+            // sceneList.Add(new SceneList(4, $"Anim Dict {_currentPed.Dict}", _script.DefineAnimationDictToPed));
+            sceneList.Add(new SceneList(5, $"Flags {_currentPed.Flags}", _script.DefineFlagsToPed));
+            sceneList.Add(new SceneList(6, $"Relationship {_currentPed.Relationship}", _script.DefineRelationShip));
+            sceneList.Add(new SceneList(7, $"Weapon {_currentPed.WeaponModel}", _script.OpenWeaponMenu));
+
+            sceneList.Add(new SceneList(8, "Confirm Edit", _script.ConfirmEditsPed));
             
             int i = 1;
             foreach (var scene in sceneList)
@@ -102,6 +107,8 @@ namespace ScenarioCreatorClient
             {
                 // sets selectModel to false, to allow exiting the method
                 var menuHandleResponse = await menuItem.ItemData();
+
+                this.Update();
             };
 
             MenuController.AddSubmenu(_script.GetSceneMenu(), this);

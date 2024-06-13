@@ -26,10 +26,12 @@ namespace ScenarioCreatorClient
         private EntityListMenu _entityListMenu;
         private WorldPositionEditMenu _worldPositionEditMenu;
         private EntityMenu _entityMenu;
-        private PedEditMenu _pedEditMenu;
         private VehicleEditMenu _vehicleEditMenu;
+        private AnimationsMenu _animationMenu;
+        private WeaponsMenu _weaponsMenu;
         private PropEditMenu _propEditMenu;
         private static SceneMenu _sceneMenu;
+        private static PedEditMenu _pedEditMenu;
         public Scene _currentScene = null;
         private static Scenario _currentSceneData = null; 
         public bool editModeEnabled = false;
@@ -245,6 +247,10 @@ namespace ScenarioCreatorClient
         public SceneMenu GetSceneMenu()
         {
             return _sceneMenu;
+        }
+        public PedEditMenu GetPedEditMenu()
+        {
+            return _pedEditMenu;
         }
 
         #region Menu Handles
@@ -526,6 +532,40 @@ namespace ScenarioCreatorClient
 
             _worldPositionEditMenu.OpenMenu();
         }
+
+        public async Task<bool> OpenAnimationMenu() 
+        {
+            _currentPedEditMode = _currentScene.GetPedInstanceFromEntityHandle( selectedEntity );
+
+            if ( _propEditMenu != null )
+            {
+                _propEditMenu.CloseMenu();
+            }
+            if (_animationMenu == null)
+            {
+                _animationMenu = new AnimationsMenu(this, _currentPedEditMode);
+            }
+
+            _animationMenu.OpenMenu();
+            return true;
+        }
+
+        public async Task<bool> OpenWeaponMenu() 
+        {
+            _currentPedEditMode = _currentScene.GetPedInstanceFromEntityHandle( selectedEntity );
+
+            if ( _propEditMenu != null )
+            {
+                _propEditMenu.CloseMenu();
+            }
+            if (_weaponsMenu == null)
+            {
+                _weaponsMenu = new WeaponsMenu(this, _currentPedEditMode);
+            }
+
+            _weaponsMenu.OpenMenu();
+            return true;
+        }
         #endregion
 
         private async Task<string> InputUserRequest(string title) 
@@ -549,6 +589,7 @@ namespace ScenarioCreatorClient
 
             if (scenario != "") {
                 _currentPedEditMode.AddScenario(scenario);
+                _pedEditMenu.Update();
                 return true;
             }
 
@@ -559,6 +600,7 @@ namespace ScenarioCreatorClient
             var anim = await InputUserRequest("Add Anim name");
             if ( anim != "" ) {
                 _currentPedEditMode.AddAnimName(anim);
+                _pedEditMenu.Update();
                 return true;
             }
             return false;
@@ -568,6 +610,7 @@ namespace ScenarioCreatorClient
             var animDict = await InputUserRequest("Add Anim Dict");
             if ( animDict != "" ) {
                 _currentPedEditMode.AddAnimDict(animDict);
+                _pedEditMenu.Update();
                 return true;
             }
             return false;
@@ -578,6 +621,7 @@ namespace ScenarioCreatorClient
           
             if ( flag >= 0 ) {
                 _currentPedEditMode.AddFlag(flag);
+                _pedEditMenu.Update();
                 return true;
             }
             return false;
@@ -587,6 +631,7 @@ namespace ScenarioCreatorClient
             var weaponName = await InputUserRequest("Set weapon");
             if ( weaponName != "" ) {
                 _currentPedEditMode.SetWeapon(weaponName);
+                _pedEditMenu.Update();
                 return true;
             }
             return false;
@@ -596,6 +641,7 @@ namespace ScenarioCreatorClient
             var weaponName = await InputUserRequest("Set Relatioship Group (PLAYER OR ENEMY)");
             if ( weaponName != "" ) {
                 _currentPedEditMode.SetWeapon(weaponName);
+                _pedEditMenu.Update();
                 return true;
             }
             return false;
@@ -627,8 +673,11 @@ namespace ScenarioCreatorClient
                 _currentPedEditMode.Relationship,
                 _currentPedEditMode.WeaponModel
             );
+
             BaseScript.TriggerLatentServerEvent("scenarioCreator:updatePed", 1024, _currentPedEditMode.Id, JsonConvert.SerializeObject(_ped));
             Notify.Success("Ped updated");
+            _currentPedEditMode.ReloadPedConfig();
+            
             _pedEditMenu.Update();
             return true;
         }
@@ -694,7 +743,9 @@ namespace ScenarioCreatorClient
                 _currentVehicleEditMode.PedDriverMetadata
             );
             BaseScript.TriggerLatentServerEvent("scenarioCreator:updateVehicle", 1024, _currentVehicleEditMode.Id, JsonConvert.SerializeObject(_vehicle));
-            Notify.Success("Ped updated");
+            Notify.Success("Vehicle updated");
+            _currentScene.AddPedIntoVehicle( _currentVehicleEditMode.localEntityId, _currentVehicleEditMode.PedDriver );
+            _vehicleEditMenu.Update();
             return true;
         }
         #endregion

@@ -85,6 +85,13 @@ namespace ScenarioCreatorClient.Classes
             return true;
         }
 
+        public void ReloadPedConfig()
+        {
+            var lEntity = GetLocalEntity();
+            AddWeaponToPed( lEntity.Handle );
+            AddToRelationship( lEntity.Handle );
+        }
+
         public void AddToRelationship( int locEntId)
         {
             if ( Relationship != "") 
@@ -125,10 +132,11 @@ namespace ScenarioCreatorClient.Classes
             }
             else
             {
-                if ( Dict != "")
+                if ( Anim != "")
                 {
-                    await Utils.LoadAnimDict( Dict );  
-                    TaskPlayAnim( lEntity.Handle, Dict, Anim, 8.0f, 8.0f, -1, (int)Flags, 1, false, false, false);
+                    BaseScript.TriggerEvent("dpemotes:executeEmote", Anim, lEntity.Handle);
+                    // await Utils.LoadAnimDict( Dict );  
+                    // TaskPlayAnim( lEntity.Handle, Dict, Anim, 8.0f, 8.0f, -1, (int)Flags, 1, false, false, false);
                 }
             }
         }

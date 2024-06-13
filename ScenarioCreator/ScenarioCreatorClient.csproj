@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Data\animations.json" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MenuAPI.FiveM" Version="3.2.2" />
 
     <Reference Include="Microsoft.CSharp" />
@@ -59,6 +62,15 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="if exist &quot;$(SolutionDir)\postbuild.cmd&quot; &quot;$(SolutionDir)postbuild.cmd&quot;" />
   </Target>
+  
+  <ItemGroup>
+    <None Update="data\animations.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="data\weapons.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <EditorConfigFiles Remove="H:\Servers\fivem_empty_server\resources\scenario-creator\ScenarioCreator\.editorconfig" />

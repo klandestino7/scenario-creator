@@ -18,33 +18,38 @@ using ScenarioCreatorClient.Classes;
 namespace ScenarioCreatorClient
 {
 
-    internal class VehicleEditMenu : Menu
+    internal class WeaponsMenu : Menu
     {
-
-        private readonly SceneScript _script;
         #region Variables;
-
+        private readonly SceneScript _script;
         List<SceneList> sceneList = new List<SceneList>() { };
-        EntityVehicle _currentVehicle;
-
+        EntityPed _currentPed;
+        string _currentWeaponSelected;
+        List<string> _weapons;
         #endregion
 
-        internal VehicleEditMenu(SceneScript script, EntityVehicle currentVehicle, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
+        internal WeaponsMenu(SceneScript script, EntityPed currentPed, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
         {
             _script = script;
-            _currentVehicle = currentVehicle;
+            _currentPed = currentPed;
 
             Update();
         }
 
         internal void Update()
         {
-            sceneList.Add(new SceneList(1, $"Ped driver {_currentVehicle.PedDriver}", _script.DefinePedDriver));
-            sceneList.Add(new SceneList(2, $"Drive Style {_currentVehicle.PedDriverMetadata.DriverStyle}", _script.DefineDriveStyle));
-            sceneList.Add(new SceneList(3, $"Max Speed {_currentVehicle.PedDriverMetadata.MaxSpeed}", _script.DefineMaxSpeed));
-            sceneList.Add(new SceneList(4, $"To Position {_currentVehicle.PedDriverMetadata.ToPosition}", _script.DefineToPosition));
-            
-            sceneList.Add(new SceneList(5, "Confirm Edit", _script.ConfirmEditsVehicle));
+
+            LoadJson();
+
+            foreach (var weapon in _weapons)
+            {
+                var item = new MenuItem(weapon);
+                
+                item.Description = "Press enter to change";
+                item.ItemData = weapon;
+                this.AddMenuItem(item);
+            }
+
             
             int i = 1;
             foreach (var scene in sceneList)
@@ -59,6 +64,7 @@ namespace ScenarioCreatorClient
 
             bool inSelection = true;
 
+
             // prevents player closing the menu
             this.OnMenuClose += (Menu m) =>
             {
@@ -67,20 +73,42 @@ namespace ScenarioCreatorClient
 
             this.OnIndexChange += async (Menu m, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex) =>
             {
-                
+                _currentWeaponSelected = newItem.ItemData;
             };
 
             // when the player chooses a model
             this.OnItemSelect += async (Menu m, MenuItem menuItem, int itemIndex) =>
             {
                 // sets selectModel to false, to allow exiting the method
-                var menuHandleResponse = await menuItem.ItemData();
+                _currentWeaponSelected = menuItem.ItemData;
+
+                _currentPed.SetWeapon( _currentWeaponSelected );
+
+                var lEntity = _currentPed.GetLocalEntity();
+                _currentPed.AddWeaponToPed( lEntity.Handle );
             };
 
-            MenuController.AddSubmenu(_script.GetSceneMenu(), this);
+            MenuController.AddSubmenu(_script.GetPedEditMenu(), this);
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
         }
 
+        internal void LoadJson(string fileName = "data/weapons.json")
+        {
+            try
+            {
+                string strings = LoadResourceFile(GetCurrentResourceName(), fileName);
+                _weapons = JsonConvert.DeserializeObject<List<string>>(strings);
+
+                Debug.WriteLine($"{nameof(MainScript)}: Loaded config from {fileName}");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"{nameof(MainScript)}: Impossible to load {fileName}", e.Message);
+                Debug.WriteLine(e.StackTrace);
+
+                _weapons = new List<string>() { };
+            }
+        }
         internal bool HideMenu
         {
             get => MenuController.DontOpenAnyMenu;
