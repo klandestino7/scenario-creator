@@ -25,7 +25,7 @@ namespace ScenarioCreatorShared
         /// <summary>
         /// The expected name of the resource
         /// </summary>
-        public const string ResourceName = "scenario-creator";
+        public const string ResourceName = "scenario";
 
         /// <summary>
         /// The prefix used for commands exposed by the script
