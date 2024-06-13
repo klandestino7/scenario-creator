@@ -13,6 +13,8 @@ server_debug_mode 'false'
 
 experimental_features_enabled '0'
 
+dependency 'dpemotes'
+
 -- Files & scripts
 files {
     "System.Numerics.dll",
