@@ -56,7 +56,7 @@ namespace ScenarioCreatorClient.Classes
             foreach (var prop in props)
             {
                 var pp = new EntityProp( 
-                    prop.Id == -1 ? Props.Count + 1 : prop.Id,
+                    prop.Id == -1 ? entitiesCount + 1 : prop.Id,
                     prop.Model,
                     prop.Position,
                     prop.Rotation,
@@ -66,8 +66,9 @@ namespace ScenarioCreatorClient.Classes
 
                 await pp.BeforeInitialization();
                 
+                pp.localId = entitiesCount + 1;
                 Props.Add( pp );
-                Entities[pp.localEntityId]= pp.Id;
+                Entities[pp.localEntityId] = pp.localId;
                 entitiesCount += 1;
             }
         }
@@ -78,7 +79,7 @@ namespace ScenarioCreatorClient.Classes
 
                 Debug.WriteLine($" vehicle.PedDriverMetadata :: {vehicle.PedDriverMetadata}");
                 var veh = new EntityVehicle( 
-                    vehicle.Id == -1 ? Vehicles.Count + 1 : vehicle.Id,
+                    vehicle.Id == -1 ? entitiesCount + 1 : vehicle.Id,
                     vehicle.Model,
                     vehicle.Position,
                     vehicle.Rotation,
@@ -92,8 +93,9 @@ namespace ScenarioCreatorClient.Classes
 
                 AddPedIntoVehicle( veh.localEntityId, vehicle.PedDriver );
 
+                veh.localId = entitiesCount + 1;
                 Vehicles.Add( veh );
-                Entities[veh.localEntityId]= veh.Id;
+                Entities[veh.localEntityId]= veh.localId;
                 entitiesCount += 1;
             }
         }
@@ -102,7 +104,7 @@ namespace ScenarioCreatorClient.Classes
             foreach (var ped in peds)
             {
                 var pd = new EntityPed( 
-                    ped.Id == -1 ? Peds.Count + 1 : ped.Id,
+                    ped.Id == -1 ? entitiesCount + 1 : ped.Id,
                     ped.Model,
                     ped.Position,
                     ped.Rotation,
@@ -119,8 +121,9 @@ namespace ScenarioCreatorClient.Classes
 
                 await pd.BeforeInitialization();
 
+                pd.localId = entitiesCount + 1;
                 Peds.Add( pd );
-                Entities[pd.localEntityId]= pd.Id;
+                Entities[pd.localEntityId]= pd.localId;
                 entitiesCount += 1;
             }
         }
@@ -129,11 +132,12 @@ namespace ScenarioCreatorClient.Classes
         {
             p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
+            p.localId = entitiesCount + 1;
 
             Func<int, bool> CallbackFunction = (insertId) => {
                 p.Id = insertId;
                 Props.Add( p );
-                Entities[localId]= insertId;
+                Entities[localId] = p.localId;
                 entitiesCount += 1;
                 return true;
             };
@@ -144,11 +148,12 @@ namespace ScenarioCreatorClient.Classes
         {
             p.localEntityId = localId;
             p.netEntityId = NetworkGetNetworkIdFromEntity( localId );
+            p.localId = entitiesCount + 1;
 
             Func<int, bool> CallbackFunction = (insertId) => {
                 p.Id = insertId;
                 Peds.Add( p );
-                Entities[localId]= insertId;
+                Entities[localId]= p.localId;
                 entitiesCount += 1;
                 return true;
             };
@@ -160,11 +165,12 @@ namespace ScenarioCreatorClient.Classes
         {
             v.localEntityId = localId;
             v.netEntityId = NetworkGetNetworkIdFromEntity( localId );
+            v.localId = entitiesCount + 1;
 
             Func<int, bool> CallbackFunction = (insertId) => {
                 v.Id = insertId;
                 Vehicles.Add( v );
-                Entities[localId]= insertId;
+                Entities[localId]= v.localId;
                 entitiesCount += 1;
                 return true;
             };
@@ -234,23 +240,23 @@ namespace ScenarioCreatorClient.Classes
 
             var idToFind = classId;
 
-            // Debug.WriteLine($" GetEntityInstanceFromHandleId :: idToFind {idToFind}");
+            Debug.WriteLine($" GetEntityInstanceFromHandleId :: idToFind {idToFind}");
 
-            EntityBase entityFound = Peds.Find(p => p.Id == idToFind);
+            EntityBase entityFound = Peds.Find(p => p.localId == idToFind);
 
             switch( entityType ) {
                 case (int)Globals.eEntityTypeToClass.EntityPed:
-                    EntityPed foundPed = Peds.Find(p => p.Id == idToFind);
+                    EntityPed foundPed = Peds.Find(p => p.localId == idToFind);
                     entityFound = foundPed;
                 break;
 
                 case (int)Globals.eEntityTypeToClass.EntityVehicle:
-                    EntityVehicle foundVehicle = Vehicles.Find(p => p.Id == idToFind);
+                    EntityVehicle foundVehicle = Vehicles.Find(p => p.localId == idToFind);
                     entityFound = foundVehicle;
                 break;
                 
                 case (int)Globals.eEntityTypeToClass.EntityProp:
-                    EntityProp foundObj = Props.Find(p => p.Id == idToFind);
+                    EntityProp foundObj = Props.Find(p => p.localId == idToFind);
                     entityFound = foundObj;
                 break;
             }

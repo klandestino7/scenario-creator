@@ -18,6 +18,7 @@ namespace ScenarioCreatorClient.Classes
     public abstract class EntityBase
     {
         public abstract int Id  { get; set; }
+        public abstract int localId { get; set; }
         public abstract string Model  { get; set; }
         public abstract Vector3 Position  { get; set; }
         public abstract Vector3 Rotation  { get; set; }

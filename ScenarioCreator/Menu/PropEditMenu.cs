@@ -37,7 +37,7 @@ namespace ScenarioCreatorClient
 
         #endregion
 
-        internal PropEditMenu(SceneScript script, EntityProp currentProp, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
+        internal PropEditMenu(SceneScript script, EntityProp currentProp, string name = Globals.ScriptName, string subtitle = "Prop Edit Menu") : base(name, subtitle)
         {
             _script = script;
 

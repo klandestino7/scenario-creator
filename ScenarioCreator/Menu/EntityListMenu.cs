@@ -43,7 +43,7 @@ namespace ScenarioCreatorClient
                 foreach (var s in _entities)
                 {
                     // Debug.WriteLine($" ESSE ENT :: {s.Model}");
-                    var item = new MenuItem($"[{s.Id}] {s.Model}");
+                    var item = new MenuItem($"[{s.localId}] {s.Model}");
                     
                     item.ItemData = s.localEntityId;
                     this.AddMenuItem(item);

@@ -15,6 +15,7 @@ namespace ScenarioCreatorClient.Classes
     public class EntityPed : EntityBase
     {
         public override int Id  { get; set; }
+        public override int localId { get; set; }
         public override string Model  { get; set; }
         public override Vector3 Position  { get; set; }
         public override Vector3 Rotation  { get; set; }

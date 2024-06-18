@@ -50,7 +50,7 @@ namespace ScenarioCreatorClient
         List<SlideChangerItem> menuList = new List<SlideChangerItem>() { };
         #endregion
 
-        internal WorldPositionEditMenu(SceneScript script, EntityBase currentEntity, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
+        internal WorldPositionEditMenu(SceneScript script, EntityBase currentEntity, string name = Globals.ScriptName, string subtitle = "World Position Edit Menu") : base(name, subtitle)
         {
             _script = script;
             _currentEntity = currentEntity;
@@ -157,7 +157,9 @@ namespace ScenarioCreatorClient
             {
                 // _script.HandleEntityList();
 
-                _currentEntity.SaveWorldPositionOnDB();
+                if ( _currentEntity != null ){
+                    _currentEntity.SaveWorldPositionOnDB();
+                }
             };
 
             this.OnIndexChange += async (Menu m, MenuItem oldItem, MenuItem newItem, int oldIndex, int newIndex) =>

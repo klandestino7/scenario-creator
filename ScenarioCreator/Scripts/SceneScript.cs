@@ -520,16 +520,23 @@ namespace ScenarioCreatorClient
         private void OpenMenuToEditWorldPosition()
         {
             var _currentEntityToChangePosition = _currentScene.GetEntityInstanceFromHandleId( selectedEntity );
+
+            if ( _currentEntityToChangePosition == null || selectedEntity <= 0 ){
+                Notify.Error("Select Entity again");
+                return;
+            }
             
             if ( _entityListMenu != null )
             {
                 _entityListMenu.CloseMenu();
             }
-            if (_worldPositionEditMenu == null)
+            if (_worldPositionEditMenu != null)
             {
-                _worldPositionEditMenu = new WorldPositionEditMenu(this, _currentEntityToChangePosition);
+                _worldPositionEditMenu.ClearMenuItems();
+                _worldPositionEditMenu.CloseMenu();
             }
 
+            _worldPositionEditMenu = new WorldPositionEditMenu(this, _currentEntityToChangePosition);
             _worldPositionEditMenu.OpenMenu();
         }
 

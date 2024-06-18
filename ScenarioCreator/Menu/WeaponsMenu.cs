@@ -28,7 +28,7 @@ namespace ScenarioCreatorClient
         List<string> _weapons;
         #endregion
 
-        internal WeaponsMenu(SceneScript script, EntityPed currentPed, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
+        internal WeaponsMenu(SceneScript script, EntityPed currentPed, string name = Globals.ScriptName, string subtitle = "Weapons Menu") : base(name, subtitle)
         {
             _script = script;
             _currentPed = currentPed;

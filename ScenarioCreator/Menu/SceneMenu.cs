@@ -62,10 +62,10 @@ namespace ScenarioCreatorClient
         internal void Update()
         {
             
-            MenuCheckboxItem menuCheckBox = new MenuCheckboxItem("Edit Mode Bool", "When its be enabled you can edit select entity just looking for.", _script.editModeEnabled);
-            // Add a menu item to a menu:
+            // MenuCheckboxItem menuCheckBox = new MenuCheckboxItem("Edit Mode Bool", "When its be enabled you can edit select entity just looking for.", _script.editModeEnabled);
+            // // Add a menu item to a menu:
 
-            this.AddMenuItem(menuCheckBox);
+            // this.AddMenuItem(menuCheckBox);
 
             int i = 1;
             foreach (var scene in sceneList)
@@ -88,10 +88,10 @@ namespace ScenarioCreatorClient
                 
             };
 
-            this.OnCheckboxChange += (sender, item, itemIndex, _checked) =>
-            {
-                _script.HandleToggleEditMode(_checked); 
-            };
+            // this.OnCheckboxChange += (sender, item, itemIndex, _checked) =>
+            // {
+            //     _script.HandleToggleEditMode(_checked); 
+            // };
 
             // when the player chooses a model
             this.OnItemSelect +=  async (Menu m, MenuItem menuItem, int itemIndex) =>

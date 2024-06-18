@@ -29,7 +29,7 @@ namespace ScenarioCreatorClient
 
         #endregion
 
-        internal VehicleEditMenu(SceneScript script, EntityVehicle currentVehicle, string name = Globals.ScriptName, string subtitle = "Ped Edit Menu") : base(name, subtitle)
+        internal VehicleEditMenu(SceneScript script, EntityVehicle currentVehicle, string name = Globals.ScriptName, string subtitle = "Vehicle Edit Menu") : base(name, subtitle)
         {
             _script = script;
             _currentVehicle = currentVehicle;
@@ -39,6 +39,9 @@ namespace ScenarioCreatorClient
 
         internal void Update()
         {
+            this.ClearMenuItems();
+            sceneList = new List<SceneList>() { }; 
+            
             sceneList.Add(new SceneList(1, $"Ped driver {_currentVehicle.PedDriver}", _script.DefinePedDriver));
             sceneList.Add(new SceneList(2, $"Drive Style {_currentVehicle.PedDriverMetadata.DriverStyle}", _script.DefineDriveStyle));
             sceneList.Add(new SceneList(3, $"Max Speed {_currentVehicle.PedDriverMetadata.MaxSpeed}", _script.DefineMaxSpeed));
